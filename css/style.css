@@ -1,0 +1,667 @@
+:root {
+    --bg-dark-green: #121e17; 
+    --bg-main: #1a2b20; 
+    --bg-light-green: #2a473a;
+    --text-color: #d1d1d1;
+    --accent-color: #5cb85c;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-color);
+    
+    /* === ВИПРАВЛЕННЯ ФУТЕРА (Grid) === */
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+.bg-dark-green {
+    background-color: var(--bg-dark-green) !important;
+}
+
+.content-section {
+    padding: 2rem;
+}
+
+.container + .content-section.container {
+    padding-top: 0;
+}
+
+/* === КАРТКИ ІГОР === */
+.game-card {
+    background-color: var(--bg-light-green);
+    border: 1px solid #3a5f7e;
+    color: #ffffff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.game-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    /* Піднімаємо картку над іншими при наведенні (щоб меню не ховалося) */
+    z-index: 100;
+    position: relative;
+}
+
+.game-card .card-img-top {
+    height: 200px; /* Фіксована висота для карток */
+    object-fit: cover;
+    width: 100%;
+}
+
+.game-card .card-title {
+    color: #ffffff;
+}
+.game-card .text-accent {
+    color: var(--accent-color) !important;
+    font-weight: bold;
+}
+
+/* === КАТЕГОРІЇ === */
+.category-card {
+    background-color: var(--bg-light-green);
+    min-height: 150px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .375rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.category-card:hover {
+    transform: scale(1.03);
+}
+
+/* === ФУТЕР І КНОПКИ === */
+.footer {
+    color: #8f98a0;
+}
+
+.btn-section-nav {
+    background-color: var(--bg-light-green);
+    color: var(--text-color);
+    border: 1px solid var(--accent-color);
+    flex-grow: 1;
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.btn-section-nav:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-dark-green);
+    border-color: var(--accent-color);
+}
+
+/* === СПИСОК НОВИНОК (Sidebar на головній) === */
+.new-release-list {
+    background-color: var(--bg-dark-green);
+    border-radius: .375rem;
+    overflow: hidden;
+}
+
+.release-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    text-decoration: none;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--bg-main);
+    transition: background-color 0.2s;
+}
+
+.release-item:last-child {
+    border-bottom: none;
+}
+
+.release-item:hover {
+    background-color: var(--bg-light-green);
+}
+
+.release-item.active {
+    background-color: var(--bg-light-green);
+    box-shadow: inset 4px 0 0 var(--accent-color);
+}
+
+.release-item img {
+    width: 150px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 1rem;
+}
+
+.release-item .release-info {
+    flex-grow: 1;
+}
+
+.release-item .release-info h5 {
+    margin-bottom: 0.25rem;
+    color: #ffffff;
+}
+
+.release-item .release-info .tags {
+    font-size: 0.85rem;
+    color: #a0a0a0;
+}
+
+.release-item .release-nav-arrow {
+    font-size: 2.2rem;
+    font-weight: lighter;
+    min-width: 60px;
+    text-align: right;
+    color: var(--accent-color);
+    line-height: 0.8;
+}
+
+/* === ПРЕВ'Ю НОВИНОК === */
+.new-release-preview {
+    background-color: var(--bg-light-green);
+    padding: 1rem;
+    border-radius: .375rem;
+}
+
+.new-release-preview img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.new-release-preview h4 {
+    color: var(--accent-color);
+}
+
+.carousel-img {
+    height: 450px;
+    object-fit: cover;
+    width: 100%;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9rem;
+    font-family: Arial, sans-serif;
+}
+
+/* === ВІДГУКИ (Стиль Steam) === */
+.game-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.game-review-card {
+    background-color: var(--bg-dark-green);
+    border-radius: .375rem;
+    border: 1px solid var(--bg-light-green);
+    display: flex; 
+    padding: 1.5rem;
+}
+
+.game-review-user-info-wrapper {
+    flex-shrink: 0; 
+    width: 120px; 
+    text-align: center;
+    padding-right: 1.5rem; 
+    border-right: 1px solid var(--bg-light-green); 
+}
+
+.game-review-avatar {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    border-radius: 4px; 
+    object-fit: cover;
+    margin: 0 auto 0.5rem auto; 
+    display: block; 
+}
+
+.game-review-username {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1rem; 
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.game-review-body-content {
+    flex-grow: 1; 
+    padding-left: 1.5rem; 
+}
+
+.game-review-rec {
+    font-size: 1rem; 
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    display: inline-flex; 
+    align-items: center;
+}
+
+.game-review-rec.positive {
+    background-color: rgba(92, 184, 92, 0.1); 
+    color: var(--accent-color); 
+}
+.game-review-rec.negative {
+    background-color: rgba(220, 53, 69, 0.1); 
+    color: #dc3545; 
+}
+
+.game-review-rec .fas {
+    margin-right: 8px;
+    font-size: 1.2rem; 
+}
+
+.game-review-body-content p {
+    color: #f1f1f1;
+    white-space: pre-wrap; 
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.game-review-date-bottom {
+    color: var(--text-color);
+    font-size: 0.8rem;
+    opacity: 0.7;
+    display: block;
+    margin-top: 1rem;
+}
+
+/* Форма відгуків */
+.form-check-label .fas {
+    margin-right: 5px;
+}
+.form-check-input:checked + .form-check-label .fa-thumbs-up {
+    color: var(--accent-color);
+}
+.form-check-input:checked + .form-check-label .fa-thumbs-down {
+    color: #dc3545; 
+}
+
+/* Кнопка "Видалити коментар" */
+.review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.btn-delete-review {
+    background: none;
+    border: none;
+    color: #8f98a0;
+    font-size: 0.85rem;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.btn-delete-review:hover {
+    color: #dc3545;
+}
+.btn-delete-review .fas {
+    margin-right: 4px;
+}
+
+/* === HERO CAROUSEL (Слайдер новин) === */
+.hero-carousel-container {
+    background-color: var(--bg-dark-green);
+    position: relative;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    border-radius: .375rem; 
+    overflow: hidden; 
+}
+
+#heroNewsCarousel {
+    height: 640px; 
+    position: relative;
+}
+
+#heroNewsCarousel .carousel-item {
+    height: 550px; 
+    background-size: cover;
+    background-position: center 20%;
+}
+
+.hero-carousel-content {
+    position: absolute;
+    bottom: 90px; 
+    left: 0;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    padding: 5rem;
+    color: #fff;
+    max-width: 50%;
+}
+
+.hero-carousel-content .display-4 {
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+}
+.hero-carousel-content .lead {
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+}
+
+/* Стилізація індикаторів (кнопок знизу) */
+.hero-indicators {
+    position: absolute;
+    bottom: 0; 
+    left: 0;
+    right: 0;
+    z-index: 2; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+    list-style: none !important; 
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--bg-dark-green);
+    height: 90px;
+}
+
+.hero-indicators button {
+    width: 25% !important;
+    height: 90px !important;
+    margin: 0 !important;
+    text-indent: 0 !important; 
+    border: none !important;
+    border-radius: 0 !important;
+    background-clip: padding-box !important; 
+    border-top: 0px solid transparent !important; 
+    border-bottom: 0px solid transparent !important; 
+
+    background-color: var(--bg-dark-green); /* Темний фон для неактивних */
+    padding: 10px;
+    opacity: 0.6; 
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    align-items: center;      
+    justify-content: center; 
+    position: relative;
+    overflow: hidden; 
+    border-right: 1px solid var(--bg-main); 
+}
+.hero-indicators button:last-child {
+    border-right: none;
+}
+
+.hero-indicators button.active {
+    opacity: 1;
+    background-color: var(--bg-light-green); /* Світлий фон для активної */
+}
+
+.indicator-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center;  
+    color: #fff;
+    white-space: normal;  
+    overflow: hidden;     
+    padding: 0 5px; 
+}
+.indicator-text small {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    line-height: 1.2;
+}
+.indicator-text span {
+    font-size: 0.9rem;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+@keyframes timer-bar-animation {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.indicator-timer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: var(--accent-color); 
+    width: 0;
+}
+
+.hero-indicators button.active .indicator-timer-bar {
+    animation: timer-bar-animation 7s linear;
+}
+
+/* === АДМІН ПАНЕЛЬ І НОВИНИ === */
+.admin-panel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.admin-panel-item .game-list-info {
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+.admin-panel-item .form-check-input {
+    flex-shrink: 0;
+}
+.admin-panel-item .btn-outline-danger {
+    flex-shrink: 0;
+}
+ 
+.news-card {
+    background-color: var(--bg-dark-green);
+    border: 1px solid var(--bg-light-green);
+    color: var(--text-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+.news-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+.news-card-img {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+.news-card .card-body {
+    background-color: var(--bg-light-green);
+}
+.news-card .card-title {
+    color: #ffffff;
+}
+.news-card .card-footer {
+    background-color: var(--bg-light-green);
+    border-top: 1px solid var(--bg-main);
+}
+
+/* === СТОРІНКА ЖАНРІВ === */
+.genre-sidebar {
+    background-color: var(--bg-dark-green);
+    border-radius: .375rem;
+    padding: 1rem;
+    border: 1px solid var(--bg-light-green);
+}
+
+.genre-btn {
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    border-bottom: 1px solid var(--bg-main);
+    transition: all 0.2s;
+    text-align: left;
+    padding: 10px 15px;
+}
+.genre-btn:last-child {
+    border-bottom: none;
+}
+.genre-btn:hover {
+    background-color: var(--bg-light-green);
+    color: #fff;
+    padding-left: 20px;
+}
+.genre-btn.active {
+    background-color: var(--accent-color);
+    color: var(--bg-dark-green);
+    font-weight: bold;
+    border-color: var(--accent-color);
+}
+
+/* === СТИЛІ ДЛЯ ЛІВОЇ КОЛОНКИ (Особливості, Мови, Досягнення) === */
+
+.info-block {
+    font-size: 0.9rem;
+}
+
+/* Список особливостей */
+.game-features-list {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 10px;
+}
+.feature-item {
+    padding: 5px 8px;
+    margin-bottom: 2px;
+    background-color: var(--bg-dark-green);
+    border-radius: 2px;
+    font-size: 0.85rem;
+    color: #a3b3c3; 
+    display: flex;
+    align-items: center;
+}
+.feature-item .fas {
+    width: 20px;
+    text-align: center;
+}
+
+/* Таблиця мов */
+.languages-block {
+    background-color: var(--bg-dark-green); /* Темний фон */
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.languages-table {
+    margin-bottom: 0;
+}
+.languages-table th {
+    color: #8f98a0;
+    font-weight: normal;
+}
+.languages-table td {
+    color: #a3b3c3;
+    padding: 2px 5px;
+}
+.languages-table tr:last-child td {
+    border-bottom: none;
+}
+.lang-name {
+    width: 100px;
+}
+
+/* === БЛОК ДОСЯГНЕНЬ (SIDEBAR - СПИСОК) === 
+   Тут ми виправляємо проблему з великими картинками.
+*/
+.achievements-block {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.achievements-list-sidebar {
+    display: flex;
+    flex-direction: column; /* Робимо список вертикальним */
+    gap: 8px;
+}
+
+.ach-sidebar-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-dark-green);
+    padding: 5px;
+    border-radius: 4px;
+}
+
+/* === ВАЖЛИВЕ ВИПРАВЛЕННЯ: Фіксуємо розмір іконки в списку === */
+.achievements-list-sidebar .ach-sidebar-item img {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    object-fit: cover;
+    border-radius: 2px;
+    margin-right: 10px;
+    border: 1px solid #333;
+    display: block;
+}
+
+.ach-sidebar-item span {
+    color: #a3b3c3;
+    font-size: 0.85rem;
+    line-height: 1.1;
+}
+
+.view-all-link {
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 2px;
+}
+.view-all-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+/* === ГЛОБАЛЬНИЙ СТИЛЬ ДЛЯ МОДАЛЬНИХ ВІКОН (ТЕМНА ТЕМА) === */
+.modal-content {
+    background-color: var(--bg-dark-green) !important; /* Темний фон */
+    color: #d1d1d1 !important;                        /* Світлий текст */
+    border: 1px solid var(--bg-light-green) !important;
+    border-radius: 8px !important;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%) !important; /* Білий хрестик */
+    opacity: 0.8;
+}
+.btn-close:hover {
+    opacity: 1;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--bg-light-green) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--bg-light-green) !important;
+}
+
+.modal-title {
+    color: #ffffff !important; /* Білий заголовок */
+    font-weight: bold;
+}
+
+.modal-body p {
+    color: #d1d1d1 !important;
+    font-size: 1rem;
+    line-height: 1.6;
+}
