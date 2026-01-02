@@ -8,17 +8,14 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION[
 $admin_user_id = $_SESSION['user_id'];
 $message = ''; 
 
-// 1. МАСОВЕ ДОДАВАННЯ ДОСЯГНЕНЬ (АДМІН)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
     $ach_game_id = (int)$_POST['ach_game_id'];
     
-    // Отримуємо назву гри для папки
     $stmt_title = $pdo->prepare("SELECT title FROM games WHERE id = ?");
     $stmt_title->execute([$ach_game_id]);
     $game_title = $stmt_title->fetchColumn();
     
     if ($game_title) {
-        // СТВОРЕННЯ ПАПКИ
         $safe_folder_name = preg_replace('/[^A-Za-z0-9\- ]/', '', $game_title);
         $safe_folder_name = trim($safe_folder_name);
         $target_dir = "img/achievements/" . $safe_folder_name . "/";
@@ -55,7 +52,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
     }
 }
 
-// 2. ДОДАВАННЯ ГРИ (без змін логіки, просто копіюємо)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_game'])) {
     $title = trim($_POST['title']);
     $publisher_id = $admin_user_id;
@@ -95,7 +91,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_game'])) {
     } else { $message = '<div class="alert alert-danger">'. implode('<br>', $errors) .'</div>'; }
 }
 
-// 3. ОНОВЛЕННЯ СЛАЙДЕРА (без змін)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_hero_slider'])) {
     $hero_game_ids = $_POST['hero_games'] ?? [];
     try {
@@ -109,9 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_hero_slider']))
     } catch (PDOException $e) { $message = '<div class="alert alert-danger">Помилка: '. $e->getMessage() .'</div>'; }
 }
 
-// 4. НОВИНИ (Спрощено)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_news_article'])) {
-    // ... (код додавання новини, як і раніше)
 }
 
 $stmt_all_games = $pdo->query("SELECT id, title, cover_url, is_in_hero_slider FROM games ORDER BY id DESC");
@@ -167,7 +160,6 @@ require_once 'includes/header.php';
     </div>
 </div>
 <script>
-// (JS для кнопки "+" такий самий, як у developer_panel.php)
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('achievements-container');
     const addBtn = document.getElementById('add-more-btn');
