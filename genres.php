@@ -3,12 +3,10 @@ $pageTitle = 'Огляд жанрів';
 require_once 'includes/db_connect.php';
 require_once 'includes/header.php';
 
-// 1. Отримуємо всі ігри з БД
 $stmt = $pdo->prepare("SELECT * FROM games ORDER BY title ASC");
 $stmt->execute();
 $all_games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 2. Список жанрів
 $genres = [
     'Екшн', 'Шутер', 'Пригоди', 'Рольова гра', 'Стратегія', 
     'Симулятор', 'Гонки', 'Спорт', 'Файтинг', 'Головоломка',
@@ -76,12 +74,10 @@ $genres = [
 </div>
 
 <script>
-// Функція фільтрації (така ж, як і була)
 function filterGames(selectedGenre, btnElement) {
     const buttons = document.querySelectorAll('.genre-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
     
-    // Якщо передали елемент кнопки - робимо його активним
     if (btnElement) {
         btnElement.classList.add('active');
     }
@@ -110,19 +106,14 @@ function filterGames(selectedGenre, btnElement) {
     }
 }
 
-// === НОВИЙ КОД: Авто-вибір жанру з URL ===
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Читаємо параметр ?genre=... з адреси
     const urlParams = new URLSearchParams(window.location.search);
     const genreParam = urlParams.get('genre');
 
     if (genreParam) {
-        // 2. Шукаємо кнопку з таким текстом
         const buttons = document.querySelectorAll('.genre-btn');
         buttons.forEach(btn => {
-            // trim() прибирає зайві пробіли
             if (btn.innerText.trim() === genreParam) {
-                // 3. Імітуємо клік по ній
                 filterGames(genreParam, btn);
             }
         });

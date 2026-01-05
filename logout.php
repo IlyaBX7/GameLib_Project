@@ -1,13 +1,10 @@
 <?php
-session_start(); // Запускаємо сесію
+session_start();
 
-// Видаляємо всі змінні сесії
 $_SESSION = [];
 
-// Руйнуємо сесію
 session_destroy();
 
-// Перенаправляємо на головну сторінку
 header("Location: index.php");
 exit;
 ?>

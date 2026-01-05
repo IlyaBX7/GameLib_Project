@@ -2,7 +2,6 @@
 session_start();
 require_once 'includes/db_connect.php';
 
-// --- БЕЗПЕКА: Тільки для розробників ---
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -11,15 +10,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'developer') {
     die("<h1>Доступ заборонено</h1><p>Ви не маєте прав для доступу до цієї сторінки.</p>");
 }
 $developer_id = $_SESSION['user_id'];
-// --- КІНЕЦЬ БЕЗПЕКИ ---
 
 $message = ''; 
 
-// === 1. ЛОГІКА ДОДАВАННЯ ДОСЯГНЕНЬ (МАСОВЕ + ПАПКИ) ===
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
     $ach_game_id = (int)$_POST['ach_game_id'];
     
-    // Перевірка: чи належить гра цьому розробнику?
     $stmt_check = $pdo->prepare("SELECT id, title FROM games WHERE id = ? AND publisher_id = ?");
     $stmt_check->execute([$ach_game_id, $developer_id]);
     $game_data = $stmt_check->fetch(PDO::FETCH_ASSOC);
@@ -27,16 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
     if ($game_data) {
         $game_title = $game_data['title'];
         
-        // === СТВОРЕННЯ ПАПКИ ДЛЯ ГРИ ===
-        // Робимо назву безпечною для папки (прибираємо спецсимволи)
         $safe_folder_name = preg_replace('/[^A-Za-z0-9\- ]/', '', $game_title);
-        $safe_folder_name = trim($safe_folder_name); // Прибираємо пробіли по краях
+        $safe_folder_name = trim($safe_folder_name);
         $target_dir = "img/achievements/" . $safe_folder_name . "/";
         
         if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true); // Створюємо папку, якщо немає
+            mkdir($target_dir, 0777, true);
         }
-        // ================================
 
         $titles = $_POST['ach_title']; 
         $descs = $_POST['ach_desc'];
@@ -52,10 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
             $ach_icon_path = '';
             if (isset($_FILES['ach_icon']['name'][$i]) && $_FILES['ach_icon']['error'][$i] == 0) {
                 $ext = pathinfo($_FILES['ach_icon']['name'][$i], PATHINFO_EXTENSION);
-                // Ім'я файлу: назва_досягнення.jpg (щоб було красиво)
                 $safe_ach_name = preg_replace('/[^A-Za-z0-9\-]/', '', $title);
                 
-                // Додаємо time() щоб уникнути дублікатів імен
                 $target_file = $target_dir . $safe_ach_name . "_" . time() . "_" . $i . "." . $ext;
                 
                 if (move_uploaded_file($_FILES['ach_icon']['tmp_name'][$i], $target_file)) {
@@ -83,7 +74,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
     }
 }
 
-// === 2. ЛОГІКА ДОДАВАННЯ ГРИ ===
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_game'])) {
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);

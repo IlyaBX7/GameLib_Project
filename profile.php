@@ -2,9 +2,8 @@
 session_start();
 require_once 'includes/db_connect.php';
 
-$message = ''; // Для сповіщень
+$message = '';
 
-// --- 1. ОБРОБКА ЗАВАНТАЖЕННЯ АВАТАРА ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['new_avatar'])) {
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
@@ -38,32 +37,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['new_avatar'])) {
     }
 }
 
-// --- 2. НОВЕ: ОБРОБКА ЗМІНИ СТАТУСУ ГРИ ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_status'])) {
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
         $game_id = (int)$_POST['game_id'];
         $new_status = $_POST['status'];
         
-        // Дозволені статуси (захист)
         $allowed_statuses = ['playing', 'completed', 'planned', 'dropped', 'owned'];
         
         if (in_array($new_status, $allowed_statuses)) {
             $stmt = $pdo->prepare("UPDATE user_library SET status = ? WHERE user_id = ? AND game_id = ?");
             $stmt->execute([$new_status, $user_id, $game_id]);
-            // Перезавантажуємо сторінку, щоб побачити зміни
             header("Location: profile.php"); 
             exit;
         }
     }
 }
 
-// --- 3. ОБРОБКА КОМЕНТАРЯ ДЛЯ РОЗРОБНИКА ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_dev_review'])) {
-    // ... (код той самий)
     if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
     $author_user_id = $_SESSION['user_id'];
-    $developer_user_id = (int)$_GET['id']; // Беремо ID з URL
+    $developer_user_id = (int)$_GET['id'];
     $comment_text = trim($_POST['comment_text']);
     
     if (!empty($comment_text)) {
@@ -71,7 +65,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_dev_review'])) 
         $stmt_insert->execute([$developer_user_id, $author_user_id, $comment_text]);
     }
 }
-// --- 4. ВИДАЛЕННЯ КОМЕНТАРЯ ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dev_review'])) {
      if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
      $user_id = $_SESSION['user_id'];
@@ -85,7 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dev_review'])) 
 }
 
 
-// --- Визначаємо, чий профіль дивимось ---
 $profile_user_id = 0;
 $is_own_profile = false;
 
@@ -102,7 +94,6 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     exit;
 }
 
-// --- Отримуємо дані профілю ---
 $stmt_user = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt_user->execute([$profile_user_id]);
 $profile_user = $stmt_user->fetch();
@@ -111,27 +102,23 @@ if (!$profile_user) {
     die("Помилка: Користувача з таким ID не знайдено.");
 }
 
-// --- Логіка відображення ігор ---
 $is_developer = ($profile_user['user_role'] === 'developer');
 $games_list = [];
 $slider_games = [];
 $dev_reviews = [];
 
 if ($is_developer) {
-    // Для розробника - ігри, які він створив
     $stmt_games = $pdo->prepare("SELECT * FROM games WHERE publisher_id = ? ORDER BY id DESC");
     $stmt_games->execute([$profile_user_id]);
     $games_list = $stmt_games->fetchAll();
     $slider_games = array_slice($games_list, 0, 4);
     
-    // Коментарі стіни
     $stmt_dev_reviews = $pdo->prepare("SELECT r.*, u.username, u.avatar_url FROM developer_reviews r JOIN users u ON r.author_user_id = u.id WHERE r.developer_user_id = ? ORDER BY r.created_at DESC");
     $stmt_dev_reviews->execute([$profile_user_id]);
     $dev_reviews = $stmt_dev_reviews->fetchAll();
     
 } else {
-    // Для звичайного гравця - його бібліотека + статус
-    // SELECT games.*, user_library.status <-- Важливо отримати статус
+
     $stmt_games = $pdo->prepare("
         SELECT games.*, user_library.status 
         FROM games
@@ -143,7 +130,6 @@ if ($is_developer) {
     $games_list = $stmt_games->fetchAll();
 }
 
-// === ФУНКЦІЯ ДЛЯ ВІДОБРАЖЕННЯ СТАТУСУ ===
 function getStatusBadge($status) {
     switch ($status) {
         case 'playing': return ['text' => 'Граю зараз', 'class' => 'btn-success', 'icon' => 'fa-gamepad'];

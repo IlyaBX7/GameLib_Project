@@ -5,13 +5,10 @@ $pageTitle = 'Пошук';
 $search_query = '';
 $results = [];
 
-// Перевіряємо, чи користувач щось шукав (чи є ?query= в URL)
 if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
     
     $search_query = trim($_GET['query']);
     
-    // Готуємо запит до БД з оператором LIKE
-    // %...% означає, що ми шукаємо збіг у будь-якій частині назви
     $sql_query = "SELECT * FROM games WHERE title LIKE ?";
     $search_param = "%" . $search_query . "%";
     
@@ -20,8 +17,7 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
         $stmt->execute([$search_param]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        // (в реальному проекті тут варто було б логувати помилку)
-        $results = []; // Порожній результат у разі помилки
+        $results = [];
     }
 }
 

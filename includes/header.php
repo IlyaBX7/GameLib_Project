@@ -1,5 +1,4 @@
 <?php
-// Ми запускаємо сесію на КОЖНІЙ сторінці, щоб знати, хто увійшов
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }

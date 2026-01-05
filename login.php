@@ -4,7 +4,6 @@ session_start();
 
 $errors = [];
 
-// Якщо форма відправлена
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -12,19 +11,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($email) || empty($password)) {
         $errors[] = "Введіть email та пароль.";
     } else {
-        // Шукаємо користувача
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
 
-        // Перевіряємо пароль
         if ($user && password_verify($password, $user['password_hash'])) {
-            // Пароль вірний! Зберігаємо дані в сесію
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['user_role'] = $user['user_role']; // <-- ВАЖЛИВО: Зберігаємо роль
+            $_SESSION['user_role'] = $user['user_role'];
             
-            header("Location: profile.php"); // Перенаправляємо на профіль
+            header("Location: profile.php");
             exit;
         } else {
             $errors[] = "Невірний email або пароль.";

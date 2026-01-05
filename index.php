@@ -3,17 +3,14 @@ $pageTitle = 'GameLib - Головна';
 require_once 'includes/db_connect.php'; 
 require_once 'includes/header.php'; 
 
-// 1. Запит для Hero-слайдера
 $stmt_hero = $pdo->prepare("SELECT * FROM games WHERE is_in_hero_slider = 1 ORDER BY id DESC LIMIT 4");
 $stmt_hero->execute();
 $hero_games = $stmt_hero->fetchAll(PDO::FETCH_ASSOC);
 
-// 2. Запит для Новин
 $stmt_news = $pdo->prepare("SELECT n.*, u.username FROM news_articles n JOIN users u ON n.author_id = u.id ORDER BY n.created_at DESC LIMIT 3");
 $stmt_news->execute();
 $news_articles = $stmt_news->fetchAll(PDO::FETCH_ASSOC);
 
-// 3. Запит для "Популярне в колекціях"
 $stmt_popular = $pdo->prepare("
     SELECT g.id, g.title, g.cover_url, COUNT(ul.user_id) as collection_count
     FROM games g
@@ -25,7 +22,6 @@ $stmt_popular = $pdo->prepare("
 $stmt_popular->execute();
 $popular_games = $stmt_popular->fetchAll(PDO::FETCH_ASSOC);
 
-// 4. Запит для "Популярні новинки"
 $stmt_new = $pdo->prepare("SELECT * FROM games ORDER BY id DESC LIMIT 10");
 $stmt_new->execute();
 $new_games = $stmt_new->fetchAll(PDO::FETCH_ASSOC);

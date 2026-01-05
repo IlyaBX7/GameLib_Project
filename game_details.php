@@ -8,7 +8,6 @@ if ($game_id <= 0) die("Помилка: Невірний ID гри.");
 $message = ''; 
 $review_message = ''; 
 
-// Логіка додавання до бібліотеки
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_to_library'])) {
     if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
     $user_id = $_SESSION['user_id'];
@@ -22,7 +21,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_to_library'])) {
     }
 }
 
-// Логіка відгуків
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_review'])) {
     if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
     $user_id = $_SESSION['user_id'];
@@ -44,7 +42,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_review'])) {
     }
 }
 
-// Логіка видалення відгуку
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_game_review'])) {
     if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
     $user_id = $_SESSION['user_id'];
@@ -58,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_game_review']))
     }
 }
 
-// ОТРИМАННЯ ДАНИХ
 $stmt = $pdo->prepare("SELECT * FROM games WHERE id = ?");
 $stmt->execute([$game_id]);
 $game = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -111,7 +107,7 @@ require_once 'includes/header.php';
                         $features = explode(',', $game['features']);
                         foreach($features as $feat): 
                             $feat = trim($feat);
-                            $icon = 'fa-check'; // Іконка за замовчуванням
+                            $icon = 'fa-check';
                             if ($feat == 'Одиночна гра') $icon = 'fa-user';
                             elseif ($feat == 'Багатокористувацька') $icon = 'fa-users';
                             elseif ($feat == 'Кооператив') $icon = 'fa-handshake';
@@ -133,10 +129,8 @@ require_once 'includes/header.php';
                         <thead><tr><th></th><th>Текст</th><th>Звук</th><th>Субт.</th></tr></thead>
                         <tbody>
                             <?php 
-                                // Стандартний список мов, який ми перевіряємо
                                 $all_langs = ['Українська', 'Англійська', 'Французька', 'Німецька', 'Іспанська'];
                                 $game_langs = !empty($game['languages']) ? explode(',', $game['languages']) : [];
-                                // Чистимо пробіли
                                 $game_langs = array_map('trim', $game_langs);
                                 
                                 $visible_langs = array_slice($all_langs, 0, 5);

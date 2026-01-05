@@ -2,14 +2,12 @@
 require_once 'includes/db_connect.php';
 $game_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// 1. Отримуємо інформацію про гру
 $stmt = $pdo->prepare("SELECT title, cover_url FROM games WHERE id = ?");
 $stmt->execute([$game_id]);
 $game = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$game) die("Гру не знайдено.");
 
-// 2. Отримуємо тільки список досягнень (без складної математики)
 $stmt_ach = $pdo->prepare("SELECT * FROM achievements WHERE game_id = ?");
 $stmt_ach->execute([$game_id]);
 $achievements = $stmt_ach->fetchAll(PDO::FETCH_ASSOC);
@@ -64,7 +62,6 @@ require_once 'includes/header.php';
 </div>
 
 <style>
-/* Локальні стилі для цієї сторінки */
 .achievement-row {
     background-color: #1b1b1b;
     border: 1px solid #333;
@@ -74,7 +71,6 @@ require_once 'includes/header.php';
     height: 64px;
     border-radius: 4px;
 }
-/* Стиль для світло-зелених посилань */
 .text-accent-light {
     color: #85c0ef; 
 }

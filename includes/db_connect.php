@@ -1,8 +1,8 @@
 <?php
-$host = 'localhost';      // Або 127.0.0.1
-$db   = 'gamelib_db';  // Назва твоєї бази даних
-$user = 'root';           // Ваш логін до БД (зазвичай 'root')
-$pass = '';              // Ваш пароль до БД (зазвичай порожній)
+$host = 'db';
+$db   = 'game_library';
+$user = 'root';
+$pass = 'root';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
