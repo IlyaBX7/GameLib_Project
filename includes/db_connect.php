@@ -1,11 +1,11 @@
 <?php
-$host = 'db';
-$db = 'game_library';
+$host = 'database';
+$database = 'game_library';
 $user = 'root';
 $pass = 'root'; 
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+    $pdo = new PDO("mysql:host=$host;dbname=$database;charset=utf8", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Помилка підключення до бази даних: " . $e->getMessage());
