@@ -1,8 +1,8 @@
 <?php
-$host = 'db';
-$db   = 'game_library';
-$user = 'root';
-$pass = 'root';
+$host = getenv('DB_HOST') ?: 'db';
+$db   = getenv('DB_NAME') ?: 'game_library';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASSWORD') ?: 'root';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
