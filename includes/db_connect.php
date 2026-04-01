@@ -1,6 +1,18 @@
 <?php
 $host = 'database';
 $database = 'game_library';
+
+define('BASE_URL', '/'); 
+
+if (!function_exists('resolve_url')) {
+    function resolve_url($url) {
+        if (empty($url)) return '';
+        if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0) {
+            return $url;
+        }
+        return BASE_URL . ltrim($url, '/');
+    }
+}
 $user = 'root';
 $pass = 'root'; 
 
