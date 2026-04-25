@@ -8,6 +8,7 @@ $bp = isset($base_path) ? $base_path : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle : 'GameLib - Бібліотека ігор'; ?></title>
+    <link rel="icon" href="<?php echo BASE_URL; ?>img/GameLib_logo.png" type="image/png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,7 +30,7 @@ $bp = isset($base_path) ? $base_path : '';
 <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="<?php echo $bp; ?>index.php">
-            <i class="fas fa-gamepad"></i> GameLib
+            <img src="<?php echo BASE_URL; ?>img/GameLib_logo.png" alt="GameLib Logo" style="height: 30px; margin-right: 10px;"> GameLib
         </a>
         <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"><i class="fas fa-bars text-white fs-4"></i></button>
 
