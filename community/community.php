@@ -8,13 +8,19 @@ $stmt_top = $pdo->query("
                (SELECT COUNT(*) FROM user_library WHERE user_id = u.id) * 50 +
                (SELECT COUNT(*) FROM game_reviews WHERE user_id = u.id) * 100 +
                (SELECT COUNT(*) FROM friendships WHERE (user_id1 = u.id OR user_id2 = u.id) AND status = 'accepted') * 20 +
-               IF(u.user_role = 'developer', (SELECT COUNT(*) FROM followers WHERE developer_id = u.id) * 50, 0)
+               IF(u.user_role = 'developer', (SELECT COUNT(*) FROM followers WHERE developer_id = u.id) * 50, 0) +
+               u.bonus_xp
            ) as xp
     FROM users u
     ORDER BY xp DESC
     LIMIT 3
 ");
 $top_users = $stmt_top->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($top_users as &$tu) {
+    $tu['level'] = floor(sqrt($tu['xp'] / 100)) + 1;
+}
+unset($tu);
 
 $filter_role = isset($_GET['role']) ? $_GET['role'] : 'all';
 
@@ -47,7 +53,7 @@ require_once '../includes/header.php';
                     <a href="../user/profile.php?id=<?php echo $top_users[1]['id']; ?>" class="text-decoration-none">
                         <img src="<?php echo htmlspecialchars(resolve_url($top_users[1]['avatar_url'] ?? 'img/avatars/default.png')); ?>" class="podium-avatar">
                         <span class="podium-username d-block"><?php echo htmlspecialchars($top_users[1]['username']); ?></span>
-                        <span class="podium-xp"><?php echo $top_users[1]['xp']; ?> XP</span>
+                        <span class="podium-xp"><i class="fas fa-star text-warning me-1"></i>Рівень <?php echo $top_users[1]['level']; ?></span>
                         <div class="podium-step">2</div>
                     </a>
                 </div>
@@ -57,7 +63,7 @@ require_once '../includes/header.php';
                     <a href="../user/profile.php?id=<?php echo $top_users[0]['id']; ?>" class="text-decoration-none">
                         <img src="<?php echo htmlspecialchars(resolve_url($top_users[0]['avatar_url'] ?? 'img/avatars/default.png')); ?>" class="podium-avatar">
                         <span class="podium-username d-block fs-4"><?php echo htmlspecialchars($top_users[0]['username']); ?></span>
-                        <span class="podium-xp fs-5"><?php echo $top_users[0]['xp']; ?> XP</span>
+                        <span class="podium-xp fs-5"><i class="fas fa-star text-warning me-1"></i>Рівень <?php echo $top_users[0]['level']; ?></span>
                         <div class="podium-step">1</div>
                     </a>
                 </div>
@@ -66,7 +72,7 @@ require_once '../includes/header.php';
                     <a href="../user/profile.php?id=<?php echo $top_users[2]['id']; ?>" class="text-decoration-none">
                         <img src="<?php echo htmlspecialchars(resolve_url($top_users[2]['avatar_url'] ?? 'img/avatars/default.png')); ?>" class="podium-avatar">
                         <span class="podium-username d-block"><?php echo htmlspecialchars($top_users[2]['username']); ?></span>
-                        <span class="podium-xp"><?php echo $top_users[2]['xp']; ?> XP</span>
+                        <span class="podium-xp"><i class="fas fa-star text-warning me-1"></i>Рівень <?php echo $top_users[2]['level']; ?></span>
                         <div class="podium-step">3</div>
                     </a>
                 </div>
