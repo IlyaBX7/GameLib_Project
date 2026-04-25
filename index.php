@@ -63,6 +63,25 @@ require_once 'includes/header.php';
         object-fit: cover !important; 
         object-position: center 15% !important; 
     }
+    
+    @media (max-width: 768px) {
+        .carousel-item img {
+            height: 250px !important;
+        }
+        .hero-caption h2 {
+            font-size: 1.25rem !important;
+            margin-bottom: 5px !important;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important;
+        }
+        .hero-caption p {
+            font-size: 0.85rem !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9) !important;
+            display: none; /* Hide tags on very small screens to save space */
+        }
+        .hero-caption {
+            padding: 1rem !important;
+        }
+    }
 </style>
 
 <?php if (!empty($hero_games)): ?>
@@ -73,7 +92,7 @@ require_once 'includes/header.php';
             <div class="carousel-item <?php echo ($index == 0) ? 'active' : ''; ?>">
                 <a href="games/game_details.php?id=<?php echo $game['id']; ?>">
                     <img src="<?php echo htmlspecialchars(resolve_url($game['cover_url'])); ?>" class="d-block w-100 hero-img" alt="<?php echo htmlspecialchars($game['title']); ?>">
-                    <div class="carousel-caption hero-caption d-none d-md-block text-start p-4">
+                    <div class="carousel-caption hero-caption d-block text-start p-4">
                         <h2 class="fw-bold text-white mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);"><?php echo htmlspecialchars($game['title']); ?></h2>
                         <p class="text-light mb-0" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);"><?php echo htmlspecialchars($game['tags']); ?></p>
                     </div>
@@ -213,7 +232,7 @@ require_once 'includes/header.php';
                            data-cover="<?php echo htmlspecialchars(resolve_url($game['cover_url'])); ?>"
                            data-title="<?php echo htmlspecialchars($game['title']); ?>"
                            data-desc="<?php echo htmlspecialchars(mb_substr($game['description'], 0, 180, 'UTF-8')) . '...'; ?>"
-                           data-link="game_details.php?id=<?php echo $game['id']; ?>"
+                           data-link="games/game_details.php?id=<?php echo $game['id']; ?>"
                            style="border-bottom: 1px solid var(--border-color); padding: 12px 15px;">
 
                             <img src="<?php echo htmlspecialchars(resolve_url($game['cover_url'])); ?>" alt="Cover" style="width: 130px; height: 65px; object-fit: cover; border-radius: 4px;" class="me-3">
