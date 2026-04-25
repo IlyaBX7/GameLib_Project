@@ -16,13 +16,11 @@ if (isset($_GET['action'])) {
     }
 
     if ($_GET['action'] == 'get_notifications' && isset($_SESSION['user_id'])) {
-        $stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 10");
+        $stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY id DESC LIMIT 10");
         $stmt->execute([$_SESSION['user_id']]);
         $notifs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt_unread = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
-        $stmt_unread->execute([$_SESSION['user_id']]);
-        $unread = $stmt_unread->fetchColumn();
+        $unread = count($notifs);
 
         echo json_encode(['unread' => $unread, 'items' => $notifs]);
         exit;
