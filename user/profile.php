@@ -109,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_dev_review'])) 
     if (!empty($comment_text)) {
         $pdo->prepare("INSERT INTO developer_reviews (developer_user_id, author_user_id, comment_text) VALUES (?, ?, ?)")->execute([$developer_user_id, $author_user_id, $comment_text]);
         $msg = "Користувач {$_SESSION['username']} залишив відгук на вашій стіні.";
-        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$developer_user_id, $msg, "profile.php?id={$developer_user_id}"]);
+        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$developer_user_id, $msg, "user/profile.php?id={$developer_user_id}"]);
     }
 }
 
@@ -129,11 +129,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['friend_action'])) {
     if ($action == 'add') {
         $pdo->prepare("INSERT INTO friendships (user_id1, user_id2, status) VALUES (?, ?, 'pending')")->execute([$current_id, $target_id]);
         $msg = "{$_SESSION['username']} надіслав(ла) вам заявку в друзі.";
-        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$target_id, $msg, "profile.php"]);
+        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$target_id, $msg, "user/profile.php"]);
     } elseif ($action == 'accept') {
         $pdo->prepare("UPDATE friendships SET status = 'accepted' WHERE user_id1 = ? AND user_id2 = ?")->execute([$target_id, $current_id]);
         $msg = "{$_SESSION['username']} прийняв(ла) вашу заявку в друзі.";
-        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$target_id, $msg, "profile.php?id={$current_id}"]);
+        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$target_id, $msg, "user/profile.php?id={$current_id}"]);
     } elseif ($action == 'remove' || $action == 'cancel') {
         $pdo->prepare("DELETE FROM friendships WHERE (user_id1 = ? AND user_id2 = ?) OR (user_id1 = ? AND user_id2 = ?)")->execute([$current_id, $target_id, $target_id, $current_id]);
     }
@@ -147,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['follow_action'])) {
     if ($action == 'follow') {
         $pdo->prepare("INSERT INTO followers (user_id, developer_id) VALUES (?, ?)")->execute([$user_id, $dev_id]);
         $msg = "{$_SESSION['username']} тепер стежить за вашими оновленнями.";
-        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$dev_id, $msg, "profile.php?id={$user_id}"]);
+        $pdo->prepare("INSERT INTO notifications (user_id, message, link) VALUES (?, ?, ?)")->execute([$dev_id, $msg, "user/profile.php?id={$user_id}"]);
     } elseif ($action == 'unfollow') {
         $pdo->prepare("DELETE FROM followers WHERE user_id = ? AND developer_id = ?")->execute([$user_id, $dev_id]);
     }
