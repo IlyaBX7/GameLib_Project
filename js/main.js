@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
     const gameItems = document.querySelectorAll('.release-item');
 
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     gameItems.forEach(item => {
 
-        item.addEventListener('click', function(event) {
+        item.addEventListener('click', function (event) {
             event.preventDefault();
 
             const title = item.dataset.title;
@@ -32,16 +32,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const carouselElement = document.getElementById('heroNewsCarousel');
     if (!carouselElement) {
         return;
     }
     const carousel = new bootstrap.Carousel(carouselElement, {
-      interval: false,
-      pause: false
+        interval: false,
+        pause: false
     });
-    const animationEndCallback = function(event) {
+    const animationEndCallback = function (event) {
         if (event.animationName === 'timer-bar-animation') {
             carousel.next();
         }
@@ -56,13 +56,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('live-search-input');
     const searchResults = document.getElementById('live-search-results');
     const bp = window.AppConfig ? window.AppConfig.basePath : '';
 
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const q = this.value.trim();
             if (q.length < 2) { searchResults.classList.add('d-none'); return; }
 
@@ -73,12 +73,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.length > 0) {
                         data.forEach(game => {
                             searchResults.innerHTML += `
-                                <a href="${bp}game_details.php?id=${game.id}" class="d-flex align-items-center p-2 text-decoration-none border-bottom border-secondary text-white hover-game-item">
+                                <a href="${bp}games/game_details.php?id=${game.id}" class="d-flex align-items-center p-2 text-decoration-none border-bottom border-secondary text-white hover-game-item">
                                     <img src="${game.cover_url}" style="width: 35px; height: 35px; object-fit: cover; border-radius: 4px;" class="me-2 border border-secondary">
                                     <span class="small text-truncate fw-bold">${game.title}</span>
                                 </a>`;
                         });
-                        searchResults.innerHTML += `<a href="${bp}search.php?query=${encodeURIComponent(q)}" class="d-block p-2 text-center text-accent small fw-bold text-decoration-none" style="background: rgba(0,255,100,0.1);">Переглянути всі результати</a>`;
+                        searchResults.innerHTML += `<a href="${bp}games/search.php?query=${encodeURIComponent(q)}" class="d-block p-2 text-center text-accent small fw-bold text-decoration-none" style="background: rgba(0,255,100,0.1);">Переглянути всі результати</a>`;
                         searchResults.classList.remove('d-none');
                     } else {
                         searchResults.innerHTML = '<div class="p-3 text-white-50 small text-center">Нічого не знайдено</div>';
@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
         document.addEventListener('click', e => { if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) searchResults.classList.add('d-none'); });
-        searchInput.addEventListener('keypress', e => { if(e.key === 'Enter') window.location.href = bp + 'search.php?query=' + encodeURIComponent(searchInput.value); });
+        searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') window.location.href = bp + 'games/search.php?query=' + encodeURIComponent(searchInput.value); });
     }
 
     if (document.getElementById('notif-badge')) {
         fetchNotifications();
-        setInterval(fetchNotifications, 30000); 
+        setInterval(fetchNotifications, 30000);
     }
 });
 
@@ -103,7 +103,7 @@ function fetchNotifications() {
         .then(data => {
             const badge = document.getElementById('notif-badge');
             const list = document.getElementById('notif-list');
-            if(!badge || !list) return;
+            if (!badge || !list) return;
 
             if (data.unread > 0) {
                 badge.textContent = data.unread;
@@ -132,6 +132,6 @@ function markNotificationsRead() {
     const bp = window.AppConfig ? window.AppConfig.basePath : '';
     fetch(bp + 'api/api.php?action=mark_read').then(() => {
         const badge = document.getElementById('notif-badge');
-        if(badge) badge.classList.add('d-none');
+        if (badge) badge.classList.add('d-none');
     });
 }
