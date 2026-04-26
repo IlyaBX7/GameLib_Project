@@ -4,7 +4,7 @@
 
             <div class="col-lg-4 col-md-6">
                 <a class="navbar-brand d-flex align-items-center mb-3 text-decoration-none" href="<?php echo BASE_URL; ?>index.php">
-                    <i class="fas fa-gamepad fs-3 text-accent me-2"></i> 
+                    <img src="<?php echo BASE_URL; ?>img/GameLib_logo.png" alt="GameLib Logo" style="height: 35px; margin-right: 12px;"> 
                     <span class="fs-4 fw-bold text-white">GameLib</span>
                 </a>
                 <p class="text-white-50 small pe-lg-4" style="line-height: 1.6;">
@@ -27,10 +27,10 @@
             <div class="col-lg-4 col-md-12">
                 <h5 class="text-white mb-4 fs-6 text-uppercase letter-spacing-1">Залишайтесь на зв'язку</h5>
                 <div class="d-flex gap-3 mb-4">
-                    <a href="#" class="social-btn"><i class="fab fa-discord"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-telegram-plane"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-steam"></i></a>
+                    <a href="https://discord.com/" target="_blank" class="social-btn"><i class="fab fa-discord"></i></a>
+                    <a href="https://web.telegram.org/k/" target="_blank" class="social-btn"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://x.com/" target="_blank" class="social-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="https://store.steampowered.com/" target="_blank" class="social-btn"><i class="fab fa-steam"></i></a>
                 </div>
                 <p class="text-white-50 small mb-1"><i class="fas fa-envelope text-accent me-2"></i> support@gamelib.com</p>
             </div>
@@ -51,7 +51,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="<?php echo BASE_URL; ?>js/main.js"></script>
+<script src="<?php echo BASE_URL; ?>js/main.js?v=<?php echo time(); ?>"></script>
 <?php if (isset($page_js)): ?>
     <script src="<?php echo resolve_url($page_js); ?>"></script>
 <?php endif; ?>
