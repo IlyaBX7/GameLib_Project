@@ -6,3 +6,8 @@
 .game-list-item-horizontal .game-list-title { color: #ffffff !important; }
 .transition-hover { transition: transform 0.2s ease, border-color 0.2s ease; }
 .transition-hover:hover { transform: translateY(-5px); border-color: var(--accent-color) !important; }
+
+
+.admin-sidebarrrrrrrrr {color: #000000;}
+.admin-sidebarrrrrrrrr .nav-link { color: #000000; border-radius: 8px; margin-bottom: 8px; padding: 12px 15px; transition: all 0.3s ease; font-weight: 500; }
+.admin-sidebarrrrrrrrr .admin-sidebar{color: #2a473a;}
