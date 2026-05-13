@@ -79,7 +79,7 @@ require_once '../includes/header.php';
 
     <?php
     $googleClientID = '78698731201-o8ildr7r3bqdfh0peoor9o0e77eut636.apps.googleusercontent.com';
-    $googleRedirectUri = 'http://localhost/gamelib/google_callback.php'; 
+    $googleRedirectUri = 'http://' . $_SERVER['HTTP_HOST'] . '/auth/google_callback.php'; 
     $googleLoginUrl = 'https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=' . $googleClientID . '&redirect_uri=' . urlencode($googleRedirectUri) . '&scope=email%20profile';
     ?>
 
