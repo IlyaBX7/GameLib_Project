@@ -2,10 +2,10 @@
 session_start();
 require_once '../includes/db_connect.php';
 
-$clientID = $_ENV['GOOGLE_CLIENT_ID']; 
-$clientSecret = $_ENV['GOOGLE_CLIENT_SECRET']; 
+$clientID = '78698731201-o8ildr7r3bqdfh0peoor9o0e77eut636.apps.googleusercontent.com'; 
+$clientSecret = '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';
 
-$redirectUri = 'http://localhost/gamelib/google_callback.php'; 
+$redirectUri = 'http://' . $_SERVER['HTTP_HOST'] . '/auth/google_callback.php'; 
 
 if (isset($_GET['code'])) {
 
@@ -24,9 +24,13 @@ if (isset($_GET['code'])) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
+    $curl_error = curl_error($ch);
     curl_close($ch);
 
     $tokenData = json_decode($response, true);
+    if ($response === false) {
+        die("cURL Error: " . $curl_error);
+    }
 
     if (isset($tokenData['access_token'])) {
         $accessToken = $tokenData['access_token'];
@@ -60,7 +64,7 @@ if (isset($_GET['code'])) {
 
                 $dummy_password = password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT);
 
-                $stmt = $pdo->prepare("INSERT INTO users (username, email, password, google_id, avatar_url, user_role) VALUES (?, ?, ?, ?, ?, 'user')");
+                $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, google_id, avatar_url, user_role) VALUES (?, ?, ?, ?, ?, 'user')");
                 $stmt->execute([$name, $email, $dummy_password, $google_id, $picture]);
 
                 $_SESSION['user_id'] = $pdo->lastInsertId();
@@ -70,9 +74,15 @@ if (isset($_GET['code'])) {
 
             header("Location: ../user/profile.php");
             exit;
+        } else {
+            die("Помилка отримання даних користувача: " . json_encode($userInfo));
         }
+    } else {
+        die("Помилка отримання токена: " . json_encode($tokenData));
     }
+} else {
+    die("Немає коду авторизації від Google.");
 }
 
-die("Помилка авторизації через Google. <a href='login.php'>Повернутися назад</a>");
+die("Невідома помилка авторизації через Google. <a href='login.php'>Повернутися назад</a>");
 ?>
