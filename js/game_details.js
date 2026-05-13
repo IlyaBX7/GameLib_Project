@@ -88,10 +88,18 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(deals => {
                 trackerContainer.innerHTML = ''; 
 
-                const exactDeals = deals.filter(d => d.title.toLowerCase().includes(gameTitle.toLowerCase())).slice(0, 4);
+                let exactDeals = deals.filter(d => d.title.toLowerCase() === gameTitle.toLowerCase());
+                if (exactDeals.length === 0) {
+                    const sanitize = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    exactDeals = deals.filter(d => sanitize(d.title) === sanitize(gameTitle));
+                }
+                if (exactDeals.length === 0) {
+                    exactDeals = deals.filter(d => d.title.toLowerCase().includes(gameTitle.toLowerCase()));
+                }
+                exactDeals = exactDeals.slice(0, 4);
 
                 if (exactDeals.length === 0) {
-                    trackerContainer.innerHTML = '<div class="alert alert-dark border-secondary text-white-50 shadow-sm"><i class="fas fa-info-circle me-2"></i> На жаль, зараз немає знижок або гра не продається в популярних цифрових магазинах.</div>';
+                    trackerContainer.innerHTML = '<div class="alert alert-dark border-secondary text-white-50 shadow-sm"><i class="fas fa-info-circle me-2"></i> На жаль, пропозицій не знайдено. Можливо, гра є ексклюзивом для консолей (PlayStation, Nintendo тощо) або не продається в популярних цифрових магазинах для ПК.</div>';
                     return;
                 }
 
