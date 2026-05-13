@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/cloudinary.php';
 
 $message = '';
 
@@ -59,23 +60,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['new_avatar'])) {
         $user_id = $_SESSION['user_id'];
         $file = $_FILES['new_avatar'];
         if ($file['error'] === 0) {
-            $target_dir = "img/avatars/";
-            if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
             $check = getimagesize($file['tmp_name']);
             if ($check !== false) {
-                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                $new_filename = "user_" . $user_id . "_" . time() . "." . $ext;
-                $target_path = $target_dir . $new_filename;
+                $cloudinaryUrl = uploadToCloudinary($file);
+                
+                if ($cloudinaryUrl) {
+                    $stmt_old = $pdo->prepare("SELECT avatar_url FROM users WHERE id = ?");
+                    $stmt_old->execute([$user_id]);
+                    $old_avatar_path = $stmt_old->fetchColumn();
 
-                $stmt_old = $pdo->prepare("SELECT avatar_url FROM users WHERE id = ?");
-                $stmt_old->execute([$user_id]);
-                $old_avatar_path = $stmt_old->fetchColumn();
-
-                if (move_uploaded_file($file['tmp_name'], $target_path)) {
-                    $pdo->prepare("UPDATE users SET avatar_url = ? WHERE id = ?")->execute([$target_path, $user_id]);
-                    if ($old_avatar_path && $old_avatar_path != 'img/avatars/default.png' && file_exists($old_avatar_path)) { @unlink($old_avatar_path); }
-                    $message = '<div class="alert alert-success mt-3 shadow-sm">Аватар оновлено!</div>';
+                    $pdo->prepare("UPDATE users SET avatar_url = ? WHERE id = ?")->execute([$cloudinaryUrl, $user_id]);
+                    
+                    // Видаляємо старий аватар, якщо він був локальним (для сумісності зі старими даними)
+                    if ($old_avatar_path && strpos($old_avatar_path, 'img/avatars/') === 0 && $old_avatar_path != 'img/avatars/default.png' && file_exists($old_avatar_path)) { 
+                        @unlink($old_avatar_path); 
+                    }
+                    
+                    $message = '<div class="alert alert-success mt-3 shadow-sm">Аватар успішно оновлено!</div>';
+                } else {
+                    $message = '<div class="alert alert-danger mt-3 shadow-sm">Помилка при завантаженні аватара в Cloudinary.</div>';
                 }
+            } else {
+                $message = '<div class="alert alert-danger mt-3 shadow-sm">Вибраний файл не є зображенням.</div>';
             }
         }
     }
@@ -369,7 +375,7 @@ require_once '../includes/header.php';
                     <?php if(!empty($badges)): ?>
                     <div class="mt-3 d-flex justify-content-center flex-wrap gap-2">
                         <?php foreach($badges as $b): ?>
-                            <div title="<?php echo htmlspecialchars($b['title']); ?>" class="bg-dark-green border border-secondary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; cursor: help;">
+                            <div title="<?php echo htmlspecialchars($b['title']); ?>" class="bg-dark-green border border-secondary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; cursor: pointer;">
                                 <i class="fas <?php echo htmlspecialchars($b['icon']); ?> fs-5"></i>
                             </div>
                         <?php endforeach; ?>
