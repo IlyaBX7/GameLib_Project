@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('edit-game-id').value = game.id;
                 document.getElementById('edit-form-title').value = game.title || '';
                 document.getElementById('edit-form-desc').value = game.description || '';
-                document.getElementById('edit-form-tags').value = game.tags || '';
+                const tagsArray = game.tags ? game.tags.split(',').map(t => t.trim()) : [];
+                document.querySelectorAll('.edit-tag-cb').forEach(cb => { cb.checked = tagsArray.includes(cb.value); });
                 document.getElementById('edit-form-developer').value = game.developer || '';
                 document.getElementById('edit-form-publisher').value = game.publisher || '';
                 document.getElementById('edit-form-release').value = game.release_date || '';
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('edit-form-screen3').value = game.screenshot3 || '';
                 document.getElementById('edit-form-screen4').value = game.screenshot4 || '';
 
-                const featuresArray = game.features ? game.features.split(',') : [];
+                const featuresArray = game.features ? game.features.split(',').map(f => f.trim()) : [];
                 document.querySelectorAll('.edit-feature-cb').forEach(cb => { cb.checked = featuresArray.includes(cb.value); });
                 const langsArray = game.languages ? game.languages.split(',') : [];
                 document.querySelectorAll('.edit-lang-cb').forEach(cb => { cb.checked = langsArray.includes(cb.value); });
@@ -36,8 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 const RAWG_API_KEY = '288baf617f204b65ba0a773a0ed39ef0'; 
-const genreDictionary = { "Action": "Екшен", "Indie": "Інді", "Adventure": "Пригоди", "RPG": "РПГ", "Strategy": "Стратегія", "Shooter": "Шутер" };
-function translateGenres(genresArray) { if (!genresArray || genresArray.length === 0) return ''; return genresArray.map(g => genreDictionary[g.name] || g.name).join(', '); }
+const genreDictionary = { "Action": "Екшен", "Indie": "Інді", "Adventure": "Пригоди", "RPG": "РПГ", "Role-playing (RPG)": "РПГ", "Strategy": "Стратегія", "Shooter": "Шутер", "Racing": "Гонки", "Simulation": "Симулятор", "Sports": "Спорт", "Puzzle": "Головоломка", "Platformer": "Платформер", "Fighting": "Файтинг", "Family": "Сімейна бібліотека" };
+const tagDictionary = { "horror": "Хоррор", "survival": "Виживання", "open world": "Відкритий світ", "sandbox": "Пісочниця", "singleplayer": "Однокористувацька гра", "multiplayer": "Багатокористувацька гра", "co-op": "Кооперативна гра", "achievements": "Досягнення", "full controller support": "Повна підтримка контролерів", "steam trading cards": "Колекційні картки Steam", "split screen": "Спільний/розділений екран", "cross-platform multiplayer": "Міжплатформна багатокористувацька гра" };
 async function translateText(text) { if (!text) return ''; try { const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=uk&dt=t&q=${encodeURIComponent(text)}`); const data = await res.json(); return data[0].map(item => item[0]).join(''); } catch (e) { return text; } }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -79,7 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
         ]).then(async ([gameData, screenshotsData, achievementsData]) => {
             document.getElementById('form-title').value = gameData.name || '';
             document.getElementById('form-release').value = gameData.released || '';
-            document.getElementById('form-tags').value = translateGenres(gameData.genres);
+            document.querySelectorAll('.tag-cb, .feat-cb').forEach(cb => cb.checked = false);
+            let rawgGenres = (gameData.genres || []).map(g => genreDictionary[g.name] || g.name);
+            let rawgTags = (gameData.tags || []).map(t => tagDictionary[t.slug] || tagDictionary[t.name.toLowerCase()] || t.name);
+            let combined = [...rawgGenres, ...rawgTags];
+            document.querySelectorAll('.tag-cb').forEach(cb => { if (combined.includes(cb.value)) cb.checked = true; });
+            document.querySelectorAll('.feat-cb').forEach(cb => { if (combined.includes(cb.value)) cb.checked = true; });
             document.getElementById('form-developer').value = (gameData.developers && gameData.developers.length > 0) ? gameData.developers.map(d => d.name).join(', ') : '';
             document.getElementById('form-publisher').value = (gameData.publishers && gameData.publishers.length > 0) ? gameData.publishers.map(p => p.name).join(', ') : '';
             if (gameData.background_image) document.getElementById('form-cover').value = gameData.background_image;
@@ -128,35 +134,134 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const apiSearchForm = document.getElementById('api-search-form');
-    if (apiSearchForm) {
-        apiSearchForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); const query = document.getElementById('api-search-query').value;
-            const resultsContainer = document.getElementById('api-search-results'); resultsContainer.innerHTML = '<div class="text-white w-100">Шукаю...</div>';
+    const steamSearchBtn = document.getElementById('steam-search-btn');
+    if (steamSearchBtn) {
+        steamSearchBtn.addEventListener('click', async function() {
+            const query = document.getElementById('steam-search-input').value;
+            if (!query) return;
+            const loader = document.getElementById('steam-loader');
+            const resultsContainer = document.getElementById('steam-results');
+            loader.classList.remove('d-none');
+            resultsContainer.innerHTML = '';
             try {
-                const response = await fetch(`../api/api_search.php?q=${query}`); const games = await response.json(); resultsContainer.innerHTML = '';
-                if (!games || games.length === 0) { resultsContainer.innerHTML = '<div class="text-warning">Нічого не знайдено.</div>'; return; }
+                const response = await fetch(`../api/api_search.php?q=${encodeURIComponent(query)}`);
+                const games = await response.json();
+                loader.classList.add('d-none');
+                if (!games || games.length === 0) {
+                    resultsContainer.innerHTML = '<div class="list-group-item bg-dark text-warning">Нічого не знайдено.</div>';
+                    return;
+                }
                 games.forEach(game => {
+                    const btn = document.createElement('button');
+                    btn.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary d-flex align-items-center';
                     const bgImage = game.cover ? game.cover : `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appid}/header.jpg`;
-                    const gameId = game.id ? game.id : game.appid;
-                    const card = `
-                        <div class="col-md-4">
-                            <div class="card bg-dark h-100 border-secondary shadow-sm transition-hover">
-                                <img src="${bgImage}" class="card-img-top border-bottom border-secondary" style="height: 140px; object-fit: cover;" onerror="this.src=window.AppConfig.basePath + 'img/GameLib_logo.png'">
-                                <div class="card-body p-3 d-flex flex-column">
-                                    <h6 class="card-title text-white fs-6 mb-3 fw-bold">${game.name}</h6>
-                                    <form method="POST" action="import_game.php" class="mt-auto m-0">
-                                        <input type="hidden" name="api_game_id" value="${gameId}">
-                                        <button type="submit" class="btn btn-outline-success btn-sm w-100 fw-bold"><i class="fas fa-download me-1"></i> Імпортувати</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    resultsContainer.innerHTML += card;
+                    btn.innerHTML = `<img src="${bgImage}" style="width:40px;height:40px;object-fit:cover;margin-right:10px;border-radius:4px;"> <strong>${game.name}</strong>`;
+                    btn.onclick = (e) => { e.preventDefault(); fetchSteamGameDetails(game.appid); };
+                    resultsContainer.appendChild(btn);
                 });
-            } catch (error) { resultsContainer.innerHTML = '<div class="text-danger">Помилка з\'єднання.</div>'; }
+            } catch (error) {
+                console.error(error);
+                loader.classList.add('d-none');
+                resultsContainer.innerHTML = '<div class="list-group-item bg-dark text-danger">Помилка пошуку</div>';
+            }
         });
+
+        async function fetchSteamGameDetails(appid) {
+            const loader = document.getElementById('steam-loader');
+            const resultsContainer = document.getElementById('steam-results');
+            loader.classList.remove('d-none');
+            resultsContainer.innerHTML = '<div class="text-warning my-2 fw-bold text-center">Завантаження деталей зі Steam...</div>';
+            
+            try {
+                const response = await fetch(`../api/get_steam_details.php?appid=${appid}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultsContainer.innerHTML = `<div class="alert alert-danger mt-2">${data.error}</div>`;
+                    loader.classList.add('d-none');
+                    return;
+                }
+
+                document.getElementById('steam-form-title').value = data.title || '';
+                document.getElementById('steam-form-cover').value = data.cover_url || '';
+                if (data.release_date) document.getElementById('steam-form-release').value = data.release_date;
+                if (data.developer) document.getElementById('steam-form-developer').value = data.developer;
+                if (data.publisher) document.getElementById('steam-form-publisher').value = data.publisher;
+                if (data.sys_min) document.getElementById('steam-form-sys-min').value = data.sys_min;
+                if (data.sys_rec) document.getElementById('steam-form-sys-rec').value = data.sys_rec;
+
+                if (data.description) {
+                    const cleanDesc = data.description.replace(/<[^>]*>?/gm, ''); 
+                    document.getElementById('steam-form-desc').value = await translateText(cleanDesc);
+                }
+
+                data.screenshots.forEach((url, i) => {
+                    const id = `steam-form-screen${i+1}`;
+                    const el = document.getElementById(id);
+                    if (el) el.value = url;
+                });
+
+                document.querySelectorAll('.steam-tag-cb').forEach(cb => cb.checked = false);
+                if (data.tags) {
+                    data.tags.forEach(t => {
+                        const tName = t.toLowerCase();
+                        document.querySelectorAll('.steam-tag-cb').forEach(cb => {
+                            if (tName.includes(cb.value.toLowerCase())) cb.checked = true;
+                        });
+                    });
+                }
+
+                document.querySelectorAll('.steam-feat-cb').forEach(cb => cb.checked = false);
+                if (data.features) {
+                    data.features.forEach(f => {
+                        const fName = f.toLowerCase();
+                        document.querySelectorAll('.steam-feat-cb').forEach(cb => {
+                            if (fName.includes('single') || fName.includes('одиночна')) document.getElementById('saf0').checked = true;
+                            if (fName.includes('multi') || fName.includes('багатокор')) document.getElementById('saf1').checked = true;
+                            if (fName.includes('co-op') || fName.includes('кооп')) document.getElementById('saf2').checked = true;
+                            if (fName.includes('achieve') || fName.includes('досяг')) document.getElementById('saf3').checked = true;
+                            if (fName.includes('controller') || fName.includes('контрол')) document.getElementById('saf4').checked = true;
+                            if (fName.includes('cards') || fName.includes('картки')) document.getElementById('saf5').checked = true;
+                        });
+                    });
+                }
+
+                document.querySelectorAll('.steam-lang-cb').forEach(cb => cb.checked = false);
+                if (data.languages) {
+                    const langs = data.languages.toLowerCase();
+                    if (langs.includes('ukrainian') || langs.includes('українська')) document.getElementById('sal1').checked = true;
+                    if (langs.includes('english') || langs.includes('англійська')) document.getElementById('sal2').checked = true;
+                    if (langs.includes('french') || langs.includes('французька')) document.getElementById('sal3').checked = true;
+                    if (langs.includes('german') || langs.includes('німецька')) document.getElementById('sal4').checked = true;
+                    if (langs.includes('spanish') || langs.includes('іспанська')) document.getElementById('sal5').checked = true;
+                }
+
+                document.querySelectorAll('.steam-plat-cb').forEach(cb => cb.checked = false);
+                document.getElementById('spl1').checked = true; 
+
+                const achContainer = document.getElementById('steam-achievements-container'); 
+                achContainer.innerHTML = '';
+                if (data.achievements && data.achievements.length > 0) {
+                    let achHTML = '<h5 class="text-warning mb-3">Знайдені досягнення (' + data.achievements.length + ' шт.)</h5>';
+                    const topAchievements = data.achievements.slice(0, 10);
+                    
+                    for (const ach of topAchievements) {
+                        const transTitle = await translateText(ach.title); 
+                        const transDesc = await translateText(ach.description);
+                        achHTML += `<div class="d-flex align-items-center mb-2 bg-dark p-2 rounded border border-secondary shadow-sm"><img src="${ach.icon}" style="width: 40px; height: 40px; margin-right: 10px;"><div><input type="hidden" name="rawg_ach_title[]" value="${transTitle.replace(/"/g, '&quot;')}"><input type="hidden" name="rawg_ach_desc[]" value="${transDesc.replace(/"/g, '&quot;')}"><input type="hidden" name="rawg_ach_image[]" value="${ach.icon}"><strong class="text-white">${transTitle}</strong></div></div>`;
+                    }
+                    achContainer.innerHTML = achHTML; 
+                    document.getElementById('saf3').checked = true; 
+                }
+
+                loader.classList.add('d-none');
+                resultsContainer.innerHTML = '<div class="alert alert-success mt-2 fw-bold shadow-sm">Дані зі Steam успішно завантажено! Перевірте форму.</div>';
+            } catch (err) {
+                console.error(err);
+                loader.classList.add('d-none');
+                resultsContainer.innerHTML = '<div class="alert alert-danger mt-2">Помилка завантаження даних зі Steam.</div>';
+            }
+        }
     }
 
     const container = document.getElementById('achievements-container');
