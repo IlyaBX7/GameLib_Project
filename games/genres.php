@@ -187,19 +187,42 @@ require_once '../includes/header.php';
                         <h6 class="text-success mb-2 small text-uppercase fw-bold">Особливості</h6>
                         <div class="bg-dark-green p-3 rounded border border-secondary filter-scrollable" style="max-height: 200px; overflow-y: auto;">
                             <?php 
-                            $features_list = [
-                                'Одиночна гра', 'Багатокористувацька', 'Кооператив', 'Досягнення', 'Підтримка контролерів',
-                                'Колекційні картки Steam', 'Комфортність камери', 'Нестандартне регулювання гучності', 
-                                'Без часових обмежень на введення', 'Збереження будь-коли', 'Стереозвук', 'Об\'ємний звук', 
-                                'Remote Play на телефоні', 'Remote Play на планшеті', 'Remote Play на телевізорі', 'Сімейна бібліотека'
+                            $feature_icons = [
+                                "Однокористувацька гра" => "fas fa-user",
+                                "Багатокористувацька гра" => "fas fa-users",
+                                "Гравець проти гравця" => "fas fa-crosshairs",
+                                "Гравець проти гравця в мережі" => "fas fa-globe",
+                                "Гравець проти гравця в локальній мережі" => "fas fa-ethernet",
+                                "Кооперативна гра" => "fas fa-hands-helping",
+                                "Мережева кооперативна гра" => "fas fa-user-friends",
+                                "Локальна кооперативна гра" => "fas fa-users-cog",
+                                "Спільний/розділений екран" => "fas fa-columns",
+                                "Міжплатформна багатокористувацька гра" => "fas fa-random",
+                                "Додаткове високоякісне аудіо" => "fas fa-headphones-alt",
+                                "Підтримка відстежуваних контролерів" => "fas fa-vr-cardboard",
+                                "З субтитрами" => "fas fa-closed-captioning",
+                                "Голосовий чат" => "fas fa-microphone",
+                                "Регульована складність" => "fas fa-sliders-h",
+                                "Збереження будь-коли" => "fas fa-save",
+                                "Об’ємний звук" => "fas fa-broadcast-tower",
+                                "З підтримкою HDR" => "fas fa-tv",
+                                "Повна підтримка контролерів" => "fas fa-gamepad",
+                                "Підтримка контролерів Xbox" => "fab fa-xbox",
+                                "Підтримка контролерів DualSense" => "fab fa-playstation",
+                                "Стереозвук" => "fas fa-headphones",
+                                "У власному темпі" => "fas fa-walking"
                             ];
-                            if (!empty($url_feature) && !in_array($url_feature, $features_list)) array_unshift($features_list, $url_feature);
+                            $features_list = array_keys($feature_icons);
+                            if (!empty($url_feature) && !in_array($url_feature, $features_list)) {
+                                array_unshift($features_list, $url_feature);
+                            }
                             foreach ($features_list as $index => $feature): 
                                 $is_checked = (mb_strtolower($feature, 'UTF-8') === mb_strtolower($url_feature, 'UTF-8')) ? 'checked' : '';
+                                $icon = isset($feature_icons[$feature]) ? $feature_icons[$feature] : 'fas fa-check';
                             ?>
                                 <div class="form-check mb-1">
                                     <input class="form-check-input filter-checkbox bg-dark border-secondary" type="checkbox" name="features[]" value="<?php echo htmlspecialchars($feature); ?>" id="f<?php echo $index; ?>" <?php echo $is_checked; ?>>
-                                    <label class="form-check-label text-white-50" for="f<?php echo $index; ?>"><?php echo htmlspecialchars($feature); ?></label>
+                                    <label class="form-check-label text-white-50" for="f<?php echo $index; ?>"><i class="<?php echo $icon; ?> me-1"></i> <?php echo htmlspecialchars($feature); ?></label>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -209,14 +232,24 @@ require_once '../includes/header.php';
                         <h6 class="text-success mb-2 small text-uppercase fw-bold">Мови</h6>
                         <div class="bg-dark-green p-3 rounded border border-secondary filter-scrollable" style="max-height: 150px; overflow-y: auto;">
                             <?php 
-                            $languages_list = ['Українська', 'Англійська', 'Французька', 'Німецька', 'Іспанська'];
-                            if (!empty($url_language) && !in_array($url_language, $languages_list)) array_unshift($languages_list, $url_language);
+                            $language_icons = [
+                                "Українська" => "🇺🇦",
+                                "Англійська" => "🇬🇧",
+                                "Французька" => "🇫🇷",
+                                "Німецька" => "🇩🇪",
+                                "Іспанська" => "🇪🇸"
+                            ];
+                            $languages_list = array_keys($language_icons);
+                            if (!empty($url_language) && !in_array($url_language, $languages_list)) {
+                                array_unshift($languages_list, $url_language);
+                            }
                             foreach ($languages_list as $index => $language): 
                                 $is_checked = (mb_strtolower($language, 'UTF-8') === mb_strtolower($url_language, 'UTF-8')) ? 'checked' : '';
+                                $emoji = isset($language_icons[$language]) ? $language_icons[$language] : '🌐';
                             ?>
                                 <div class="form-check mb-1">
                                     <input class="form-check-input filter-checkbox bg-dark border-secondary" type="checkbox" name="languages[]" value="<?php echo htmlspecialchars($language); ?>" id="l<?php echo $index; ?>" <?php echo $is_checked; ?>>
-                                    <label class="form-check-label text-white-50" for="l<?php echo $index; ?>"><?php echo htmlspecialchars($language); ?></label>
+                                    <label class="form-check-label text-white-50" for="l<?php echo $index; ?>"><span class="me-1"><?php echo $emoji; ?></span> <?php echo htmlspecialchars($language); ?></label>
                                 </div>
                             <?php endforeach; ?>
                         </div>
