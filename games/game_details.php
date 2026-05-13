@@ -297,21 +297,40 @@ require_once '../includes/header.php';
                     <h5 class="text-accent mb-3"><i class="fas fa-list-ul"></i> Особливості</h5>
                     <div class="game-features-list mb-3">
                         <?php 
+                            $feature_icons = [
+                                "Однокористувацька гра" => "fas fa-user",
+                                "Багатокористувацька гра" => "fas fa-users",
+                                "Гравець проти гравця" => "fas fa-crosshairs",
+                                "Гравець проти гравця в мережі" => "fas fa-globe",
+                                "Гравець проти гравця в локальній мережі" => "fas fa-ethernet",
+                                "Кооперативна гра" => "fas fa-hands-helping",
+                                "Мережева кооперативна гра" => "fas fa-user-friends",
+                                "Локальна кооперативна гра" => "fas fa-users-cog",
+                                "Спільний/розділений екран" => "fas fa-columns",
+                                "Міжплатформна багатокористувацька гра" => "fas fa-random",
+                                "Додаткове високоякісне аудіо" => "fas fa-headphones-alt",
+                                "Підтримка відстежуваних контролерів" => "fas fa-vr-cardboard",
+                                "З субтитрами" => "fas fa-closed-captioning",
+                                "Голосовий чат" => "fas fa-microphone",
+                                "Регульована складність" => "fas fa-sliders-h",
+                                "Збереження будь-коли" => "fas fa-save",
+                                "Об’ємний звук" => "fas fa-broadcast-tower",
+                                "З підтримкою HDR" => "fas fa-tv",
+                                "Повна підтримка контролерів" => "fas fa-gamepad",
+                                "Підтримка контролерів Xbox" => "fab fa-xbox",
+                                "Підтримка контролерів DualSense" => "fab fa-playstation",
+                                "Стереозвук" => "fas fa-headphones",
+                                "У власному темпі" => "fas fa-walking"
+                            ];
                             $features = explode(',', $game['features']);
                             foreach($features as $feat): 
                                 $feat = trim($feat);
-                                $icon = 'fa-check';
-                                if ($feat == 'Одиночна гра') $icon = 'fa-user';
-                                elseif ($feat == 'Багатокористувацька') $icon = 'fa-users';
-                                elseif ($feat == 'Кооператив') $icon = 'fa-handshake';
-                                elseif ($feat == 'Досягнення') $icon = 'fa-trophy';
-                                elseif ($feat == 'Підтримка контролерів') $icon = 'fa-gamepad';
-                                elseif ($feat == 'Хмарні збереження') $icon = 'fa-cloud';
+                                $icon = isset($feature_icons[$feat]) ? $feature_icons[$feat] : 'fas fa-check';
                         ?>
                         <a href="genres.php?feature=<?php echo urlencode($feat); ?>" class="feature-link-item">
                             <div class="feature-item">
-                                <i class="fas <?php echo $icon; ?> text-accent me-2" style="width: 20px; text-align: center;"></i>
-                                <span><?php echo $feat; ?></span>
+                                <i class="<?php echo $icon; ?> text-accent me-2" style="width: 20px; text-align: center;"></i>
+                                <span><?php echo htmlspecialchars($feat); ?></span>
                             </div>
                         </a>
                         <?php endforeach; ?>
@@ -324,15 +343,23 @@ require_once '../includes/header.php';
                     <?php if (!empty($game['languages'])): ?>
                         <div class="game-features-list mb-3">
                             <?php 
+                                $language_icons = [
+                                    "Українська" => "🇺🇦",
+                                    "Англійська" => "🇬🇧",
+                                    "Французька" => "🇫🇷",
+                                    "Німецька" => "🇩🇪",
+                                    "Іспанська" => "🇪🇸"
+                                ];
                                 $langs = explode(',', $game['languages']);
                                 foreach ($langs as $lang): 
                                     $lang = trim($lang);
                                     if (!empty($lang)):
                                         $formatted_lang = mb_convert_case($lang, MB_CASE_TITLE, "UTF-8");
+                                        $emoji = isset($language_icons[$formatted_lang]) ? $language_icons[$formatted_lang] : '🌐';
                             ?>
                             <a href="genres.php?language=<?php echo urlencode($formatted_lang); ?>" class="feature-link-item">
                                 <div class="feature-item">
-                                    <i class="fas fa-check text-accent me-2" style="width: 20px; text-align: center;"></i>
+                                    <span class="me-2 text-center" style="display:inline-block; width: 20px; font-size: 1.1rem;"><?php echo $emoji; ?></span>
                                     <span><?php echo htmlspecialchars($formatted_lang); ?></span>
                                 </div>
                             </a>
