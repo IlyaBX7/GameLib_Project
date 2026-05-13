@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/cloudinary.php';
 
 if (!isset($_SESSION['user_id']) || !in_array($_SESSION['user_role'], ['admin', 'developer'])) {
     header("Location: ../index.php");
@@ -16,10 +17,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_game'])) {
     $tags = trim($_POST['tags'] ?? '');
     $cover_url = trim($_POST['cover_url'] ?? '');
     $screenshot1 = trim($_POST['screenshot1'] ?? '');
-    $screenshot2 = trim($_POST['screenshot2'] ?? '');
     $screenshot3 = trim($_POST['screenshot3'] ?? '');
     $screenshot4 = trim($_POST['screenshot4'] ?? '');
     $publisher_id = $_SESSION['user_id']; 
+
+    // Обробка завантаження файлу обкладинки
+    if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
+        $cloudinaryUrl = uploadToCloudinary($_FILES['cover_image']);
+        if ($cloudinaryUrl) {
+            $cover_url = $cloudinaryUrl; // Перезаписуємо URL обкладинки посиланням з Cloudinary
+        } else {
+            $message = '<div class="alert alert-danger shadow-sm"><i class="fas fa-times-circle me-2"></i> Помилка при завантаженні обкладинки в Cloudinary.</div>';
+            $cover_url = ''; // Скидаємо, щоб не збереглося без обкладинки
+        }
+    }
 
     if (!empty($title) && !empty($cover_url)) {
 
@@ -64,7 +75,7 @@ require_once '../includes/header.php';
             <h2 class="mb-4 text-white"><i class="fas fa-plus-circle text-accent me-2"></i> Нова гра</h2>
             <?php echo $message; ?>
 
-            <form action="add_game.php" method="POST" class="bg-dark p-4 rounded border border-secondary shadow-sm" id="game-form">
+            <form action="add_game.php" method="POST" enctype="multipart/form-data" class="bg-dark p-4 rounded border border-secondary shadow-sm" id="game-form">
 
                 <div class="mb-3">
                     <label class="form-label text-white fw-bold">Назва гри *</label>
@@ -91,8 +102,9 @@ require_once '../includes/header.php';
                 <h5 class="text-accent mb-3"><i class="fas fa-image me-2"></i> Медіа-матеріали</h5>
 
                 <div class="mb-3">
-                    <label class="form-label text-white fw-bold">Головна обкладинка (URL) *</label>
-                    <input type="url" name="cover_url" id="form-cover" class="form-control bg-dark-green text-white border-secondary" required placeholder="https://...">
+                    <label class="form-label text-white fw-bold">Головна обкладинка (Завантажити файл або вставити URL)</label>
+                    <input type="file" name="cover_image" id="form-cover-file" class="form-control bg-dark-green text-white border-secondary mb-2" accept="image/*">
+                    <input type="url" name="cover_url" id="form-cover" class="form-control bg-dark-green text-white border-secondary" placeholder="Або введіть URL обкладинки (заповнюється автоматично при пошуку)">
                     <img id="preview-cover" src="" class="img-fluid rounded mt-2 d-none" style="max-height: 200px; border: 2px solid var(--accent-color);">
                 </div>
 
