@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db_connect.php';
+require_once '../includes/cloudinary.php';
 
 if (!isset($_SESSION['user_id'])) { header("Location: ../auth/login.php"); exit; }
 $user_id = $_SESSION['user_id'];
@@ -26,13 +27,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $params = [$username, $bio, $country, $accent_color, $privacy_profile, $showcase_game_id, $steam_id, $show_level_frame];
 
         if (isset($_FILES['new_banner']) && $_FILES['new_banner']['error'] === 0) {
-            $target_dir = "img/banners/";
-            if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
-            $ext = pathinfo($_FILES['new_banner']['name'], PATHINFO_EXTENSION);
-            $new_filename = "bg_" . $user_id . "_" . time() . "." . $ext;
-            if (move_uploaded_file($_FILES['new_banner']['tmp_name'], $target_dir . $new_filename)) {
+            $cloudinaryUrl = uploadToCloudinary($_FILES['new_banner']);
+            if ($cloudinaryUrl) {
                 $banner_query = ", banner_url = ?";
-                $params[] = $target_dir . $new_filename;
+                $params[] = $cloudinaryUrl;
+            } else {
+                $upload_error = true;
             }
         }
         $params[] = $user_id;
@@ -40,7 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_update = $pdo->prepare("UPDATE users SET username=?, bio=?, country=?, accent_color=?, privacy_profile=?, showcase_game_id=?, steam_id=?, show_level_frame=? $banner_query WHERE id=?");
         $stmt_update->execute($params);
         $_SESSION['username'] = $username;
-        $message = '<div class="alert alert-success shadow-sm"><i class="fas fa-check-circle me-2"></i> Основні налаштування успішно збережено!</div>';
+        
+        if (isset($upload_error)) {
+            $message = '<div class="alert alert-warning shadow-sm"><i class="fas fa-exclamation-triangle me-2"></i> Основні налаштування збережено, але виникла помилка при завантаженні зображення в Cloudinary.</div>';
+        } else {
+            $message = '<div class="alert alert-success shadow-sm"><i class="fas fa-check-circle me-2"></i> Основні налаштування успішно збережено!</div>';
+        }
     }
 
     if (isset($_POST['change_email'])) {
