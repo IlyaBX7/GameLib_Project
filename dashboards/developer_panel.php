@@ -1,5 +1,38 @@
 <?php
 session_start();
+
+$feature_icons = [
+    "Однокористувацька гра" => "fas fa-user",
+    "Багатокористувацька гра" => "fas fa-users",
+    "Гравець проти гравця" => "fas fa-crosshairs",
+    "Гравець проти гравця в мережі" => "fas fa-globe",
+    "Гравець проти гравця в локальній мережі" => "fas fa-ethernet",
+    "Кооперативна гра" => "fas fa-hands-helping",
+    "Мережева кооперативна гра" => "fas fa-user-friends",
+    "Локальна кооперативна гра" => "fas fa-users-cog",
+    "Спільний/розділений екран" => "fas fa-columns",
+    "Міжплатформна багатокористувацька гра" => "fas fa-random",
+    "Додаткове високоякісне аудіо" => "fas fa-headphones-alt",
+    "Підтримка відстежуваних контролерів" => "fas fa-vr-cardboard",
+    "З субтитрами" => "fas fa-closed-captioning",
+    "Голосовий чат" => "fas fa-microphone",
+    "Регульована складність" => "fas fa-sliders-h",
+    "Збереження будь-коли" => "fas fa-save",
+    "Об’ємний звук" => "fas fa-broadcast-tower",
+    "З підтримкою HDR" => "fas fa-tv",
+    "Повна підтримка контролерів" => "fas fa-gamepad",
+    "Підтримка контролерів Xbox" => "fab fa-xbox",
+    "Підтримка контролерів DualSense" => "fab fa-playstation",
+    "Стереозвук" => "fas fa-headphones",
+    "У власному темпі" => "fas fa-walking"
+];
+$language_icons = [
+    "Українська" => "🇺🇦",
+    "Англійська" => "🇬🇧",
+    "Французька" => "🇫🇷",
+    "Німецька" => "🇩🇪",
+    "Іспанська" => "🇪🇸"
+];
 require_once '../includes/db_connect.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'developer') {
@@ -31,8 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_game_full'])) {
     $edit_game_id = (int)($_POST['edit_game_id'] ?? 0);
     $title = trim($_POST['edit_title'] ?? ''); 
     $description = trim($_POST['edit_description'] ?? '');
-    $release_date = $_POST['edit_release_date'] ?? ''; 
-    $tags = trim($_POST['edit_tags'] ?? '');
+    $release_date = !empty(trim($_POST['edit_release_date'] ?? '')) ? trim($_POST['edit_release_date']) : '2000-01-01'; 
+    $tags_str = isset($_POST['edit_tags']) ? implode(', ', $_POST['edit_tags']) : '';
     $cover_url = trim($_POST['edit_cover_url'] ?? ''); 
     $screenshot1 = trim($_POST['edit_screenshot1'] ?? '');
     $screenshot2 = trim($_POST['edit_screenshot2'] ?? ''); 
@@ -50,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_game_full'])) {
     if (!empty($title) && !empty($cover_url) && $edit_game_id > 0) {
         try {
             $sql = "UPDATE games SET title=?, description=?, cover_url=?, tags=?, features=?, languages=?, platforms=?, developer=?, publisher=?, release_date=?, sys_min=?, sys_rec=?, screenshot1=?, screenshot2=?, screenshot3=?, screenshot4=? WHERE id=? AND publisher_id=?";
-            $pdo->prepare($sql)->execute([$title, $description, $cover_url, $tags, $features_str, $languages_str, $platforms_str, $developer, $publisher, $release_date, $sys_min, $sys_rec, $screenshot1, $screenshot2, $screenshot3, $screenshot4, $edit_game_id, $developer_id]);
+            $pdo->prepare($sql)->execute([$title, $description, $cover_url, $tags_str, $features_str, $languages_str, $platforms_str, $developer, $publisher, $release_date, $sys_min, $sys_rec, $screenshot1, $screenshot2, $screenshot3, $screenshot4, $edit_game_id, $developer_id]);
             $message = '<div class="alert alert-success shadow-sm fw-bold"><i class="fas fa-check-circle me-2"></i> Дані оновлено!</div>';
         } catch (PDOException $e) { $message = '<div class="alert alert-danger shadow-sm">Помилка: ' . $e->getMessage() . '</div>'; }
     }
@@ -80,8 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_achievement'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_game'])) {
-    $title = trim($_POST['title'] ?? ''); $description = trim($_POST['description'] ?? ''); $release_date = $_POST['release_date'] ?? '';
-    $tags = trim($_POST['tags'] ?? ''); $cover_url = trim($_POST['cover_url'] ?? ''); 
+    $title = trim($_POST['title'] ?? ''); $description = trim($_POST['description'] ?? ''); $release_date = !empty(trim($_POST['release_date'] ?? '')) ? trim($_POST['release_date']) : '2000-01-01';
+    $tags_str = isset($_POST['tags']) ? implode(', ', $_POST['tags']) : ''; $cover_url = trim($_POST['cover_url'] ?? ''); 
     $screenshot1 = trim($_POST['screenshot1'] ?? ''); $screenshot2 = trim($_POST['screenshot2'] ?? ''); 
     $screenshot3 = trim($_POST['screenshot3'] ?? ''); $screenshot4 = trim($_POST['screenshot4'] ?? '');
     $developer = trim($_POST['developer'] ?? 'Невідомо'); $publisher = trim($_POST['publisher'] ?? 'Невідомо');
@@ -94,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_game'])) {
     if (!empty($title) && !empty($cover_url)) {
         try {
             $sql = "INSERT INTO games (title, description, cover_url, tags, features, languages, platforms, developer, publisher, publisher_id, release_date, sys_min, sys_rec, screenshot1, screenshot2, screenshot3, screenshot4, screenshot5, is_approved) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
-            if ($pdo->prepare($sql)->execute([$title, $description, $cover_url, $tags, $features_str, $languages_str, $platforms_str, $developer, $publisher, $developer_id, $release_date, $sys_min, $sys_rec, $screenshot1, $screenshot2, $screenshot3, $screenshot4, ''])) {
+            if ($pdo->prepare($sql)->execute([$title, $description, $cover_url, $tags_str, $features_str, $languages_str, $platforms_str, $developer, $publisher, $developer_id, $release_date, $sys_min, $sys_rec, $screenshot1, $screenshot2, $screenshot3, $screenshot4, ''])) {
                 $new_game_id = $pdo->lastInsertId();
                 $message = '<div class="alert alert-success shadow-sm fw-bold"><i class="fas fa-check-circle me-2"></i> Гру надіслано на модерацію!</div>';
 
@@ -144,8 +177,8 @@ require_once '../includes/header.php';
 
                 <div class="tab-pane fade show active" id="v-pills-add-game">
                     <div class="row">
-                        <div class="col-lg-4 mb-4">
-                            <div class="bg-dark p-4 rounded border border-secondary shadow-sm sticky-top" style="top: 100px;">
+                        <div class="col-12 mb-4">
+                            <div class="bg-dark p-4 rounded border border-secondary shadow-sm">
                                 <h4 class="mb-3"><i class="text-accent fas fa-magic me-2"></i> Автозаповнення RAWG</h4>
                                 <div class="input-group mb-3 shadow-sm"><input type="text" id="rawg-search-input" class="form-control bg-dark-green text-white border-secondary" placeholder="Введіть назву..."><button class="btn btn-success fw-bold" type="button" id="rawg-search-btn"><i class="fas fa-search"></i></button></div>
                                 <div id="rawg-loader" class="text-center d-none my-3"><div class="spinner-border text-accent" role="status"></div></div>
@@ -153,50 +186,76 @@ require_once '../includes/header.php';
                             </div>
                         </div>
 
-                        <div class="col-lg-8">
+                        <div class="col-12">
                             <form action="developer_panel.php" method="POST" id="game-form" class="bg-dark-green p-4 rounded border border-secondary shadow-sm">
                                 <h4 class="mb-4"><i class="text-accent fas fa-plus-circle"></i> Додавання гри</h4>
                                 <div class="mb-3"><label class="text-white fw-bold">Назва гри *</label><input type="text" name="title" id="form-title" class="form-control" required></div>
                                 <div class="mb-3"><label class="text-white fw-bold">Опис гри</label><textarea name="description" id="form-desc" class="form-control" rows="6"></textarea></div>
 
                                 <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label text-accent fw-bold">Особливості:</label>
-                                        <div class="card bg-dark border-secondary p-2">
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="features[]" value="Одиночна гра" id="af1"><label class="form-check-label text-white" for="af1">Одиночна гра</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="features[]" value="Багатокористувацька" id="af2"><label class="form-check-label text-white" for="af2">Мультиплеєр</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="features[]" value="Кооператив" id="af3"><label class="form-check-label text-white" for="af3">Кооператив</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="features[]" value="Досягнення" id="af4"><label class="form-check-label text-white" for="af4">Досягнення</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="features[]" value="Підтримка контролерів" id="af5"><label class="form-check-label text-white" for="af5">Контролери</label></div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-accent fw-bold">Особливості гри:</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                            <?php
+                                            $f_idx = 0;
+                                            foreach($feature_icons as $feat => $icon): ?>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                    <input class="form-check-input feat-cb" type="checkbox" name="features[]" value="<?php echo htmlspecialchars($feat); ?>" id="af<?php echo $f_idx; ?>">
+                                                    <label class="form-check-label text-white-50" for="af<?php echo $f_idx; ?>"><i class="<?php echo $icon; ?> me-1"></i> <?php echo htmlspecialchars($feat); ?></label>
+                                                </div>
+                                            <?php $f_idx++; endforeach; ?>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label text-accent fw-bold">Мови:</label>
-                                        <div class="card bg-dark border-secondary p-2">
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="languages[]" value="Українська" id="al1"><label class="form-check-label text-white" for="al1">Українська</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="languages[]" value="Англійська" id="al2"><label class="form-check-label text-white" for="al2">Англійська</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="languages[]" value="Французька" id="al3"><label class="form-check-label text-white" for="al3">Французька</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="languages[]" value="Німецька" id="al4"><label class="form-check-label text-white" for="al4">Німецька</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="languages[]" value="Іспанська" id="al5"><label class="form-check-label text-white" for="al5">Іспанська</label></div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-accent fw-bold">Підтримувані мови:</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                                <?php
+                                                $l_idx = 1;
+                                                foreach($language_icons as $lang => $icon): ?>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                        <input class="form-check-input lang-cb" type="checkbox" name="languages[]" value="<?php echo $lang; ?>" id="al<?php echo $l_idx; ?>">
+                                                        <label class="form-check-label text-white-50" for="al<?php echo $l_idx; ?>"><span class="me-1"><?php echo $icon; ?></span> <?php echo $lang; ?></label>
+                                                    </div>
+                                                <?php $l_idx++; endforeach; ?>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-12 mb-3">
                                         <label class="form-label text-accent fw-bold">Платформи:</label>
-                                        <div class="card bg-dark border-secondary p-2">
-                                            <div class="form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="PC (Windows)" id="pl1"><label class="form-check-label text-white" for="pl1"><i class="fab fa-windows"></i> PC</label></div>
-                                            <div class="form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="PlayStation" id="pl2"><label class="form-check-label text-white" for="pl2"><i class="fab fa-playstation"></i> PlayStation</label></div>
-                                            <div class="form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Xbox" id="pl3"><label class="form-check-label text-white" for="pl3"><i class="fab fa-xbox"></i> Xbox</label></div>
-                                            <div class="form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Nintendo Switch" id="pl4"><label class="form-check-label text-white" for="pl4"><i class="fas fa-gamepad"></i> Nintendo</label></div>
-                                            <div class="form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Mac" id="pl5"><label class="form-check-label text-white" for="pl5"><i class="fab fa-apple"></i> Mac</label></div>
-                                            <div class="form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Linux" id="pl6"><label class="form-check-label text-white" for="pl6"><i class="fab fa-linux"></i> Linux</label></div>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="PC (Windows)" id="pl1"><label class="form-check-label text-white-50" for="pl1"><i class="fab fa-windows"></i> PC</label></div>
+                                                <div class="form-check col-md-3 col-sm-4 col-6"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="PlayStation" id="pl2"><label class="form-check-label text-white-50" for="pl2"><i class="fab fa-playstation"></i> PlayStation</label></div>
+                                                <div class="form-check col-md-3 col-sm-4 col-6"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Xbox" id="pl3"><label class="form-check-label text-white-50" for="pl3"><i class="fab fa-xbox"></i> Xbox</label></div>
+                                                <div class="form-check col-md-3 col-sm-4 col-6"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Nintendo Switch" id="pl4"><label class="form-check-label text-white-50" for="pl4"><i class="fas fa-gamepad"></i> Nintendo</label></div>
+                                                <div class="form-check col-md-3 col-sm-4 col-6"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Mac" id="pl5"><label class="form-check-label text-white-50" for="pl5"><i class="fab fa-apple"></i> Mac</label></div>
+                                                <div class="form-check col-md-3 col-sm-4 col-6"><input class="form-check-input plat-cb" type="checkbox" name="platforms[]" value="Linux" id="pl6"><label class="form-check-label text-white-50" for="pl6"><i class="fab fa-linux"></i> Linux</label></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
-                                    <div class="col-md-4"><label class="text-white fw-bold">Жанри/Теги</label><input type="text" name="tags" id="form-tags" class="form-control"></div>
-                                    <div class="col-md-4"><label class="text-white fw-bold">Розробник</label><input type="text" name="developer" id="form-developer" class="form-control"></div>
-                                    <div class="col-md-4"><label class="text-white fw-bold">Видавець</label><input type="text" name="publisher" id="form-publisher" class="form-control"></div>
+                                    <div class="col-12 mb-3">
+                                        <label class="text-white fw-bold">Жанри/Теги</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                            <?php
+                                            $add_tags = ["Екшен", "Рольові ігри", "РПГ", "Шутер", "Стратегія", "Пригоди", "Гонки", "Симулятор", "Спорт", "Головоломка", "Хоррор", "Жахи", "Платформер", "Файтинг", "Виживання", "Відкритий світ", "Пісочниця", "Інді"];
+                                            foreach($add_tags as $index => $tag): ?>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                    <input class="form-check-input tag-cb" type="checkbox" name="tags[]" value="<?php echo htmlspecialchars($tag); ?>" id="atag<?php echo $index; ?>">
+                                                    <label class="form-check-label text-white-50" for="atag<?php echo $index; ?>"><?php echo htmlspecialchars($tag); ?></label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6"><label class="text-white fw-bold">Розробник</label><input type="text" name="developer" id="form-developer" class="form-control"></div>
+                                    <div class="col-md-6"><label class="text-white fw-bold">Видавець</label><input type="text" name="publisher" id="form-publisher" class="form-control"></div>
                                 </div>
                                 <div class="mb-4"><label class="text-white fw-bold">Дата виходу</label><input type="date" name="release_date" id="form-release" class="form-control"></div>
                                 <div class="row mb-4">
@@ -218,17 +277,101 @@ require_once '../includes/header.php';
                 </div>
 
                 <div class="tab-pane fade" id="v-pills-steam">
-                    <h4 class="text-white border-bottom border-secondary pb-3 mb-4"><i class="fab fa-steam text-accent me-2"></i> Імпорт ігор зі Steam API</h4>
-                    <div class="bg-dark p-4 rounded border border-secondary shadow-sm">
-                        <p class="text-white-50 small mb-4">Введіть назву гри англійською мовою. Система знайде її в магазині Steam та дозволить надіслати заявку на імпорт в БД в один клік.</p>
-                        <form id="api-search-form" class="d-flex mb-4">
-                            <div class="input-group shadow-sm">
-                                <span class="input-group-text bg-dark-green border-secondary text-white"><i class="fas fa-search"></i></span>
-                                <input type="text" id="api-search-query" class="form-control bg-dark-green border-secondary text-white" placeholder="Наприклад: Portal 2..." required>
-                                <button type="submit" class="btn btn-success fw-bold px-4">Знайти в Steam</button>
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="bg-dark p-4 rounded border border-secondary shadow-sm">
+                                <h4 class="mb-3 text-white"><i class="fab fa-steam text-accent me-2"></i> Автозаповнення Steam</h4>
+                                <div class="input-group mb-3 shadow-sm"><input type="text" id="steam-search-input" class="form-control bg-dark-green text-white border-secondary" placeholder="Введіть назву англійською..."><button class="btn btn-success fw-bold" type="button" id="steam-search-btn"><i class="fas fa-search"></i></button></div>
+                                <div id="steam-loader" class="text-center d-none my-3"><div class="spinner-border text-white" role="status"></div></div>
+                                <div id="steam-results" class="list-group"></div>
                             </div>
-                        </form>
-                        <div id="api-search-results" class="row g-3"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <form action="developer_panel.php" method="POST" id="steam-game-form" class="bg-dark-green p-4 rounded border border-secondary shadow-sm">
+                                <h4 class="mb-4 text-white"><i class="fab fa-steam text-success"></i> Додавання гри (через Steam)</h4>
+                                <div class="mb-3"><label class="text-white fw-bold">Назва гри *</label><input type="text" name="title" id="steam-form-title" class="form-control" required></div>
+                                <div class="mb-3"><label class="text-white fw-bold">Опис гри</label><textarea name="description" id="steam-form-desc" class="form-control" rows="6"></textarea></div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-white fw-bold">Особливості гри:</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                            <?php
+                                            $s_f_idx = 0;
+                                            foreach($feature_icons as $feat => $icon): ?>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                    <input class="form-check-input steam-feat-cb" type="checkbox" name="features[]" value="<?php echo htmlspecialchars($feat); ?>" id="saf<?php echo $s_f_idx; ?>">
+                                                    <label class="form-check-label text-white-50" for="saf<?php echo $s_f_idx; ?>"><i class="<?php echo $icon; ?> me-1"></i> <?php echo htmlspecialchars($feat); ?></label>
+                                                </div>
+                                            <?php $s_f_idx++; endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-white fw-bold">Підтримувані мови:</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                                <?php
+                                                $s_l_idx = 1;
+                                                foreach($language_icons as $lang => $icon): ?>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                        <input class="form-check-input steam-lang-cb" type="checkbox" name="languages[]" value="<?php echo $lang; ?>" id="sal<?php echo $s_l_idx; ?>">
+                                                        <label class="form-check-label text-white-50" for="sal<?php echo $s_l_idx; ?>"><span class="me-1"><?php echo $icon; ?></span> <?php echo $lang; ?></label>
+                                                    </div>
+                                                <?php $s_l_idx++; endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-white fw-bold">Платформи:</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input steam-plat-cb" type="checkbox" name="platforms[]" value="PC (Windows)" id="spl1"><label class="form-check-label text-white-50" for="spl1"><i class="fab fa-windows"></i> PC</label></div>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input steam-plat-cb" type="checkbox" name="platforms[]" value="PlayStation" id="spl2"><label class="form-check-label text-white-50" for="spl2"><i class="fab fa-playstation"></i> PlayStation</label></div>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input steam-plat-cb" type="checkbox" name="platforms[]" value="Xbox" id="spl3"><label class="form-check-label text-white-50" for="spl3"><i class="fab fa-xbox"></i> Xbox</label></div>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input steam-plat-cb" type="checkbox" name="platforms[]" value="Nintendo Switch" id="spl4"><label class="form-check-label text-white-50" for="spl4"><i class="fas fa-gamepad"></i> Nintendo</label></div>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input steam-plat-cb" type="checkbox" name="platforms[]" value="Mac" id="spl5"><label class="form-check-label text-white-50" for="spl5"><i class="fab fa-apple"></i> Mac</label></div>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input steam-plat-cb" type="checkbox" name="platforms[]" value="Linux" id="spl6"><label class="form-check-label text-white-50" for="spl6"><i class="fab fa-linux"></i> Linux</label></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12 mb-3">
+                                        <label class="text-white fw-bold">Жанри/Теги</label>
+                                        <div class="card bg-dark border-secondary p-3">
+                                            <div class="row">
+                                            <?php foreach($add_tags as $index => $tag): ?>
+                                                <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                    <input class="form-check-input steam-tag-cb" type="checkbox" name="tags[]" value="<?php echo htmlspecialchars($tag); ?>" id="satag<?php echo $index; ?>">
+                                                    <label class="form-check-label text-white-50" for="satag<?php echo $index; ?>"><?php echo htmlspecialchars($tag); ?></label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6"><label class="text-white fw-bold">Розробник</label><input type="text" name="developer" id="steam-form-developer" class="form-control"></div>
+                                    <div class="col-md-6"><label class="text-white fw-bold">Видавець</label><input type="text" name="publisher" id="steam-form-publisher" class="form-control"></div>
+                                </div>
+                                <div class="mb-4"><label class="text-white fw-bold">Дата виходу</label><input type="date" name="release_date" id="steam-form-release" class="form-control"></div>
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3"><label class="text-white">Мін. вимоги</label><textarea name="sys_min" id="steam-form-sys-min" class="form-control" rows="4"></textarea></div>
+                                    <div class="col-md-6 mb-3"><label class="text-white">Рек. вимоги</label><textarea name="sys_rec" id="steam-form-sys-rec" class="form-control" rows="4"></textarea></div>
+                                </div>
+                                <div class="mb-3"><label class="text-white fw-bold">Головна обкладинка (URL) *</label><input type="url" name="cover_url" id="steam-form-cover" class="form-control" required></div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3"><label class="text-white">Скріншот 1</label><input type="url" name="screenshot1" id="steam-form-screen1" class="form-control"></div>
+                                    <div class="col-md-6 mb-3"><label class="text-white">Скріншот 2</label><input type="url" name="screenshot2" id="steam-form-screen2" class="form-control"></div>
+                                    <div class="col-md-6 mb-3"><label class="text-white">Скріншот 3</label><input type="url" name="screenshot3" id="steam-form-screen3" class="form-control"></div>
+                                    <div class="col-md-6 mb-3"><label class="text-white">Скріншот 4</label><input type="url" name="screenshot4" id="steam-form-screen4" class="form-control"></div>
+                                </div>
+                                <div id="steam-achievements-container"></div>
+                                <button type="submit" name="add_game" class="btn btn-success btn-lg w-100 mt-3 shadow-sm">Надіслати на модерацію</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -281,43 +424,68 @@ require_once '../includes/header.php';
                                     <div class="mb-3"><label class="text-white fw-bold">Опис гри</label><textarea name="edit_description" id="edit-form-desc" class="form-control bg-dark-green text-white border-secondary" rows="6"></textarea></div>
 
                                     <div class="row mb-3">
-                                        <div class="col-md-4">
+                                        <div class="col-12 mb-3">
                                             <label class="form-label text-warning fw-bold">Особливості гри:</label>
-                                            <div class="card bg-dark-green border-secondary p-2">
-                                                <div class="form-check"><input class="form-check-input edit-feature-cb" type="checkbox" name="edit_features[]" value="Одиночна гра" id="edit_af1"><label class="form-check-label text-white" for="edit_af1">Одиночна гра</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-feature-cb" type="checkbox" name="edit_features[]" value="Багатокористувацька" id="edit_af2"><label class="form-check-label text-white" for="edit_af2">Мультиплеєр</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-feature-cb" type="checkbox" name="edit_features[]" value="Кооператив" id="edit_af3"><label class="form-check-label text-white" for="edit_af3">Кооператив</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-feature-cb" type="checkbox" name="edit_features[]" value="Досягнення" id="edit_af4"><label class="form-check-label text-white" for="edit_af4">Досягнення</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-feature-cb" type="checkbox" name="edit_features[]" value="Підтримка контролерів" id="edit_af5"><label class="form-check-label text-white" for="edit_af5">Контролери</label></div>
+                                            <div class="card bg-dark-green border-secondary p-3">
+                                                <div class="row">
+                                                <?php
+                                                $e_f_idx = 0;
+                                                foreach($feature_icons as $feat => $icon): ?>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                        <input class="form-check-input edit-feature-cb" type="checkbox" name="features[]" value="<?php echo htmlspecialchars($feat); ?>" id="eaf<?php echo $e_f_idx; ?>">
+                                                        <label class="form-check-label text-white-50" for="eaf<?php echo $e_f_idx; ?>"><i class="<?php echo $icon; ?> me-1"></i> <?php echo htmlspecialchars($feat); ?></label>
+                                                    </div>
+                                                <?php $e_f_idx++; endforeach; ?>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-12 mb-3">
                                             <label class="form-label text-warning fw-bold">Підтримувані мови:</label>
-                                            <div class="card bg-dark-green border-secondary p-2">
-                                                <div class="form-check"><input class="form-check-input edit-lang-cb" type="checkbox" name="edit_languages[]" value="Українська" id="edit_al1"><label class="form-check-label text-white" for="edit_al1">Українська</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-lang-cb" type="checkbox" name="edit_languages[]" value="Англійська" id="edit_al2"><label class="form-check-label text-white" for="edit_al2">Англійська</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-lang-cb" type="checkbox" name="edit_languages[]" value="Французька" id="edit_al3"><label class="form-check-label text-white" for="edit_al3">Французька</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-lang-cb" type="checkbox" name="edit_languages[]" value="Німецька" id="edit_al4"><label class="form-check-label text-white" for="edit_al4">Німецька</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-lang-cb" type="checkbox" name="edit_languages[]" value="Іспанська" id="edit_al5"><label class="form-check-label text-white" for="edit_al5">Іспанська</label></div>
+                                            <div class="card bg-dark-green border-secondary p-3">
+                                                <div class="row">
+                                                    <?php
+                                                    $e_l_idx = 1;
+                                                    foreach($language_icons as $lang => $icon): ?>
+                                                        <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                            <input class="form-check-input edit-lang-cb" type="checkbox" name="languages[]" value="<?php echo $lang; ?>" id="edit_al<?php echo $e_l_idx; ?>">
+                                                            <label class="form-check-label text-white-50" for="edit_al<?php echo $e_l_idx; ?>"><span class="me-1"><?php echo $icon; ?></span> <?php echo $lang; ?></label>
+                                                        </div>
+                                                    <?php $e_l_idx++; endforeach; ?>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-12 mb-3">
                                             <label class="form-label text-warning fw-bold">Платформи:</label>
-                                            <div class="card bg-dark-green border-secondary p-2">
-                                                <div class="form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="PC (Windows)" id="epl1"><label class="form-check-label text-white" for="epl1"><i class="fab fa-windows"></i> PC</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="PlayStation" id="epl2"><label class="form-check-label text-white" for="epl2"><i class="fab fa-playstation"></i> PlayStation</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Xbox" id="epl3"><label class="form-check-label text-white" for="epl3"><i class="fab fa-xbox"></i> Xbox</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Nintendo Switch" id="epl4"><label class="form-check-label text-white" for="epl4"><i class="fas fa-gamepad"></i> Nintendo</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Mac" id="epl5"><label class="form-check-label text-white" for="epl5"><i class="fab fa-apple"></i> Mac</label></div>
-                                                <div class="form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Linux" id="epl6"><label class="form-check-label text-white" for="epl6"><i class="fab fa-linux"></i> Linux</label></div>
+                                            <div class="card bg-dark-green border-secondary p-3">
+                                                <div class="row">
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="PC (Windows)" id="epl1"><label class="form-check-label text-white-50" for="epl1"><i class="fab fa-windows"></i> PC</label></div>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="PlayStation" id="epl2"><label class="form-check-label text-white-50" for="epl2"><i class="fab fa-playstation"></i> PlayStation</label></div>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Xbox" id="epl3"><label class="form-check-label text-white-50" for="epl3"><i class="fab fa-xbox"></i> Xbox</label></div>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Nintendo Switch" id="epl4"><label class="form-check-label text-white-50" for="epl4"><i class="fas fa-gamepad"></i> Nintendo</label></div>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Mac" id="epl5"><label class="form-check-label text-white-50" for="epl5"><i class="fab fa-apple"></i> Mac</label></div>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check"><input class="form-check-input edit-plat-cb" type="checkbox" name="edit_platforms[]" value="Linux" id="epl6"><label class="form-check-label text-white-50" for="epl6"><i class="fab fa-linux"></i> Linux</label></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <div class="col-md-4"><label class="text-white fw-bold">Жанри/Теги</label><input type="text" name="edit_tags" id="edit-form-tags" class="form-control bg-dark-green text-white border-secondary"></div>
-                                        <div class="col-md-4"><label class="text-white fw-bold">Розробник</label><input type="text" name="edit_developer" id="edit-form-developer" class="form-control bg-dark-green text-white border-secondary"></div>
-                                        <div class="col-md-4"><label class="text-white fw-bold">Видавець</label><input type="text" name="edit_publisher" id="edit-form-publisher" class="form-control bg-dark-green text-white border-secondary"></div>
+                                        <div class="col-12 mb-3">
+                                            <label class="text-white fw-bold">Жанри/Теги</label>
+                                            <div class="card bg-dark-green border-secondary p-3">
+                                                <div class="row">
+                                                <?php
+                                                foreach($add_tags as $index => $tag): ?>
+                                                    <div class="col-md-3 col-sm-4 col-6 form-check">
+                                                        <input class="form-check-input edit-tag-cb" type="checkbox" name="edit_tags[]" value="<?php echo htmlspecialchars($tag); ?>" id="etag<?php echo $index; ?>">
+                                                        <label class="form-check-label text-white-50" for="etag<?php echo $index; ?>"><?php echo htmlspecialchars($tag); ?></label>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6"><label class="text-white fw-bold">Розробник</label><input type="text" name="edit_developer" id="edit-form-developer" class="form-control bg-dark-green text-white border-secondary"></div>
+                                        <div class="col-md-6"><label class="text-white fw-bold">Видавець</label><input type="text" name="edit_publisher" id="edit-form-publisher" class="form-control bg-dark-green text-white border-secondary"></div>
                                     </div>
                                     <div class="mb-4"><label class="text-white fw-bold">Дата виходу</label><input type="date" name="edit_release_date" id="edit-form-release" class="form-control bg-dark-green text-white border-secondary"></div>
 
